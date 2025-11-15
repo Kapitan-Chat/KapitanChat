@@ -42,13 +42,50 @@ class MessageView(ModelViewSet):
                 type=int,
                 location='query',
                 required=True,
-            )
+            ),
+            OpenApiParameter(
+                name="offset",
+                type=int,
+                location='query',
+                required=False,
+            ),
+            OpenApiParameter(
+                name="limit",
+                type=int,
+                location='query',
+                required=False,
+            ),
+            OpenApiParameter(
+                name="reverse",
+                type=bool,
+                location='query',
+                required=False,
+            ),
         ]
     )
     def list(self, request: ASGIRequest, *args, **kwargs):
         if (chat_id := request.GET.get('chat')) is None:
             return Response({"error": "chat query parameter is required!"}, status=status.HTTP_400_BAD_REQUEST)
-        return list_permitted(self, Message.objects.filter(user_id=request.user.id, chat_id=chat_id))
+        limit = request.GET.get('limit', '0')
+        offset = request.GET.get('offset', '0')
+        reverse = request.GET.get('reverse', 'false').lower() == 'true'
+        if not limit.isdigit():
+            return Response({"error": "limit query parameter must be integer!"}, status=status.HTTP_400_BAD_REQUEST)
+        if not offset.isdigit():
+            return Response({"error": "offset query parameter must be integer!"}, status=status.HTTP_400_BAD_REQUEST)
+        limit = int(limit)
+        offset = int(offset)
+        query_base = Message.objects.filter(chat_id=chat_id).order_by('id')
+        if reverse:
+            query_base = query_base.reverse()
+        if limit > 0 and offset > 0:
+            query_base = query_base[offset:limit+offset]
+        elif limit > 0:
+            query_base = query_base[:limit]
+        elif offset > 0:
+            query_base = query_base[offset:]
+
+        return list_permitted(self, query_base)
 
     def retrieve(self, request, *args, **kwargs):
         instance: Message = self.get_object()
@@ -67,7 +104,7 @@ class ChatView(mixins.CreateModelMixin,
     queryset = Chat.objects.all()
 
     def list(self, request, *args, **kwargs):
-        return list_permitted(self, Chat.objects.filter(users__id=request.user.id))
+        return list_permitted(self, Chat.objects.filter(users__id=request.user.id).order_by('updated_at'))
 
     def retrieve(self, request, *args, **kwargs):
         instance: Chat = self.get_object()

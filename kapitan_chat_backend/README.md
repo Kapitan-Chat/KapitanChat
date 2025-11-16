@@ -48,9 +48,10 @@ data: Message
 
 3. **Видалення повідомлення**
 ```py
-type: "delete_message"
-data: { "id": int }
+type: "message_delete"
+data: { "id": int, "chat": Chat }
 ```
+`chat_id` з'являється тільки при полученні пакету, його відправляти не треба
 
 # Запуск та тестування
 *При запуску у продакшені змінити `DEBUG` на `False` у settings.py

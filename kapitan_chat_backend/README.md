@@ -42,7 +42,7 @@ data: Message
 
 2. **Змінення повідомлення**
 ```py
-type: "edit_message"
+type: "message_edit"
 data: Message
 ```
 

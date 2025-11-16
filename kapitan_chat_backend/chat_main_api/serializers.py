@@ -21,6 +21,9 @@ class ChatSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("DIRECT chat cant have description.")
             if Chat.objects.filter(users__id=data['users'][0].id).filter(users__id=data['users'][1].id).filter(type=ChatType.DIRECT).exists():
                 raise serializers.ValidationError("Chat already exists.")
+        else:
+            if not 'name' in data:
+                raise serializers.ValidationError(data['type'] + " should have name.")
 
         return data
 

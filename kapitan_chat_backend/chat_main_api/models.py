@@ -27,7 +27,7 @@ class Chat(models.Model):
     created_at: datetime = models.DateTimeField(auto_now_add=True)
     updated_at: datetime = models.DateTimeField(auto_now_add=True)
 
-    users: list[User] = models.ManyToManyField(User, related_name='chats')
+    users = models.ManyToManyField(User, related_name='chats')
     created_by: User = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_created')
 
     messages: list[Message]

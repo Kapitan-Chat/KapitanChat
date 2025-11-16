@@ -2,7 +2,6 @@ from typing import Any
 
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from jsonschema.protocols import Validator
 from rest_framework.exceptions import ValidationError
 
 from chat_main_api.models import Message
@@ -45,7 +44,8 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def chat_message_edit_preprocess(self, content: dict[str, Any]):
-        msg = Message(**content)
+        msg = await Message.objects.aget(id=content['id'])
+        msg.content = content['content']
         msg.is_edited = True
         await msg.asave()
 
@@ -79,4 +79,4 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             case "message":
                 await self.chat_message_preprocess(content['data'])
             case "message_edit":
-                await self.chat_message_edit(content['data'])
+                await self.chat_message_edit_preprocess(content['data'])

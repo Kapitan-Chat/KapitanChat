@@ -33,7 +33,7 @@ class Chat(models.Model):
     messages: list[Message]
 
     def __str__(self):
-        return self.name
+        return f'{self.name} + created by {self.created_by.username}'
 
 
 class Message(models.Model):
@@ -50,8 +50,8 @@ class Message(models.Model):
 
 class Attachment(models.Model):
     id: int = models.AutoField(primary_key=True)
-    name: str = models.CharField(max_length=64)
-    storage_id: str = models.CharField(max_length=64) # хєш-айді з сховища, усі однакові файли мають однаковий хеш, але можуть мати різні назви, тому зберігати окремо файли з назвами не ефективно. Айді хєшу з сервісу сховання файлів
+    name: str = models.CharField(max_length=100)
+    storage_id = models.CharField(max_length=64,null=True, blank=True, db_index=True) # хєш-айді з сховища, усі однакові файли мають однаковий хеш, але можуть мати різні назви, тому зберігати окремо файли з назвами не ефективно. Айді хєшу з сервісу сховання файлів
     type: str = models.CharField(max_length=32)
     message: Message = models.ForeignKey(Message, on_delete=models.SET_NULL, related_name="attachments", null=True)
 

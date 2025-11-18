@@ -15,6 +15,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('me/', GetMe.as_view(), name='get_me'),
     path('<int:pk>', Users.as_view(), name='get_user'),
+
 ]
 
 urlpatterns += router.urls

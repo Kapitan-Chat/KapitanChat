@@ -20,11 +20,8 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Kapitan Chat API",
     "VERSION": "1.3.0",
 
-   
-    # убрать префикс /api из путей в схеме
     "SCHEMA_PATH_PREFIX": r"/api",
 
-    # порядок и описания групп (тегов)
     "TAGS": [
         {"name": "users", "description": "Регистрация, токены, профиль"},
         
@@ -35,10 +32,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "settings_api", "description": "Пользовательские настройки"},
     ],
 
-    # чтобы теги шли в указанном порядке
     "SORT_OPERATION_TAGS": True,
 
-    #хук для групирования тегов 
     "POSTPROCESSING_HOOKS": ["kapitan_chat_backend.schema_hooks.add_tag_groups"],
 
     "SWAGGER_UI_SETTINGS": {
@@ -80,7 +75,6 @@ INSTALLED_APPS = [
     'users_api',
 ]
 ASGI_APPLICATION = 'kapitan_chat_backend.asgi.application'
-WSGI_APPLICATION = 'kapitan_chat_backend.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -89,7 +83,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
@@ -124,9 +117,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'kapitan_chat_backend.asgi.application'
-
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -136,36 +126,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# для того чтобы иметь возможность работать с API в браузере
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        # добавь JWT, если нужно оба варианта:
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
-}
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -196,15 +156,13 @@ SIMPLE_JWT = {
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_TZ = True
-
-STATIC_URL = "/static/"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"  

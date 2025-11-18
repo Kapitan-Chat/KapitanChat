@@ -2,11 +2,10 @@ from typing import Any
 
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from jsonschema.protocols import Validator
 from rest_framework.exceptions import ValidationError
 
-from chat_main_api.models import Message
-from chat_main_api.serializers import MessageSerializer
+from chat_main_api.models import Message, Chat
+from chat_main_api.serializers import MessageSerializer, ChatSerializer
 
 
 class MainConsumer(AsyncJsonWebsocketConsumer):
@@ -31,6 +30,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             s.is_valid(raise_exception=True)
             s = s.save()
             return s
+
         try:
             msg = await sync_to_async(create_message)()
         except ValidationError:
@@ -45,7 +45,8 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def chat_message_edit_preprocess(self, content: dict[str, Any]):
-        msg = Message(**content)
+        msg = await Message.objects.aget(id=content['id'])
+        msg.content = content['content']
         msg.is_edited = True
         await msg.asave()
 
@@ -54,6 +55,22 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             {
                 'type': 'chat_message_edit',
                 'message': await sync_to_async(lambda: MessageSerializer(msg).data, thread_sensitive=True)(),
+            }
+        )
+
+    async def chat_message_delete_preprocess(self, content: dict[str, Any]):
+        msg = await Message.objects.select_related('chat').aget(id=content['id'])
+        chat = msg.chat
+        await msg.adelete()
+
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'chat_message_delete',
+                'message': {
+                    'id': content['id'],
+                    'chat': await sync_to_async(lambda: ChatSerializer(chat).data)(),
+                },
             }
         )
 
@@ -73,10 +90,20 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             'data': message
         })
 
+    async def chat_message_delete(self, event):
+        message = event['message']
+        if self.scope['user'].id not in message['chat']['users']: return
+        await self.send_json({
+            'type': 'message_delete',
+            'data': message
+        })
+
     async def receive_json(self, content: dict[str, Any], **kwargs):
         print("Data just received!", content)  # TODO
         match (content['type']):
             case "message":
                 await self.chat_message_preprocess(content['data'])
             case "message_edit":
-                await self.chat_message_edit(content['data'])
+                await self.chat_message_edit_preprocess(content['data'])
+            case "message_delete":
+                await self.chat_message_delete_preprocess(content['data'])

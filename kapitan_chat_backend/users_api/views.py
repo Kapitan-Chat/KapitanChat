@@ -1,4 +1,7 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -56,11 +59,27 @@ class Users(RetrieveAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return super().get(request, *args, **kwargs)
-    
 
-class UserList(ListAPIView):
+
+class SearchApiView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-    queryset = User.objects.all() 
-    
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="query",
+                type=str,
+                location='query',
+                required=True,
+            )
+        ]
+    )
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        query = request.GET.get('query', None)
+        if not query or query == '':
+            return Response({'message': 'request must contains query'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(query) < 3:
+            return Response({'message': 'query must be at least 3 characters'}, status=status.HTTP_400_BAD_REQUEST)
+        users = User.objects.filter(Q(username__icontains=query) | Q(profile__phone_number=query) | Q(email=query))[:5]
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)

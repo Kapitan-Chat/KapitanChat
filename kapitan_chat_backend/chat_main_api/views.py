@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
-from .models import Message, Chat, Attachment
+from .models import Message, Chat, Attachment, ChatType
 from .serializers import MessageSerializer, ChatSerializer, AttachmentSerializer
 
 from drf_spectacular.utils import extend_schema
@@ -43,13 +43,50 @@ class MessageView(ModelViewSet):
                 type=int,
                 location='query',
                 required=True,
-            )
+            ),
+            OpenApiParameter(
+                name="offset",
+                type=int,
+                location='query',
+                required=False,
+            ),
+            OpenApiParameter(
+                name="limit",
+                type=int,
+                location='query',
+                required=False,
+            ),
+            OpenApiParameter(
+                name="reverse",
+                type=bool,
+                location='query',
+                required=False,
+            ),
         ]
     )
     def list(self, request: ASGIRequest, *args, **kwargs):
         if (chat_id := request.GET.get('chat')) is None:
             return Response({"error": "chat query parameter is required!"}, status=status.HTTP_400_BAD_REQUEST)
-        return list_permitted(self, Message.objects.filter(user_id=request.user.id, chat_id=chat_id))
+        limit = request.GET.get('limit', '0')
+        offset = request.GET.get('offset', '0')
+        reverse = request.GET.get('reverse', 'false').lower() == 'true'
+        if not limit.isdigit():
+            return Response({"error": "limit query parameter must be integer!"}, status=status.HTTP_400_BAD_REQUEST)
+        if not offset.isdigit():
+            return Response({"error": "offset query parameter must be integer!"}, status=status.HTTP_400_BAD_REQUEST)
+        limit = int(limit)
+        offset = int(offset)
+        query_base = Message.objects.filter(chat_id=chat_id).order_by('id')
+        if reverse:
+            query_base = query_base.reverse()
+        if limit > 0 and offset > 0:
+            query_base = query_base[offset:limit+offset]
+        elif limit > 0:
+            query_base = query_base[:limit]
+        elif offset > 0:
+            query_base = query_base[offset:]
+
+        return list_permitted(self, query_base)
 
     def retrieve(self, request, *args, **kwargs):
         instance: Message = self.get_object()
@@ -67,8 +104,28 @@ class ChatView(mixins.CreateModelMixin,
     serializer_class = ChatSerializer
     queryset = Chat.objects.all()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="reverse",
+                type=bool,
+                location='query',
+                required=False,
+            ),
+        ]
+    )
     def list(self, request, *args, **kwargs):
-        return list_permitted(self, Chat.objects.filter(users__id=request.user.id))
+        query = Chat.objects.filter(users__id=request.user.id).order_by('updated_at')
+        if request.GET.get('reverse', 'false').lower() == 'true':
+            query = query.reverse()
+        data = query.all()
+        for c in data:
+            if c.type == ChatType.DIRECT:
+                for u in c.users.all():
+                    if u.id != request.user.id:
+                        c.name = u.first_name + (" " + u.last_name if u.last_name else "")
+                        c.description = u.profile.bio
+        return Response(ChatSerializer(data, many=True).data)
 
     def retrieve(self, request, *args, **kwargs):
         instance: Chat = self.get_object()

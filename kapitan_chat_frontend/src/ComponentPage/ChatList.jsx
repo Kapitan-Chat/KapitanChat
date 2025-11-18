@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 /**
  * Компонент для отображения списка чатов
  * 
@@ -8,9 +8,11 @@
  * @returns {React.Component} - компонент для отображения списка чатов
  */
 export default function ChatList({chatList,setChatId}) {
-
+    useEffect(() => {}, [chatList]);
     return (
-        <div className="chats-container">
+        <>
+        {chatList.length === 0?(<h1>no chat now</h1>):(
+            <div className="chats-container">
             {chatList.map((chat) => (
                 <div className={`chat-item${chat.active ? " active" : ""}`} key={chat.id} onClick={()=>setChatId(chat.id)}>
                     <div className="chat-avatar" >
@@ -29,5 +31,10 @@ export default function ChatList({chatList,setChatId}) {
                 </div>
             ))}
         </div>
+        )
+
+        }
+        </>
+        
     );
 }

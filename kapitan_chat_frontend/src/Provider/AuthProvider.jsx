@@ -30,9 +30,7 @@ export default function AuthContext({ children }) {
   
   
   const SETTINGSURL = `http://127.0.0.1:8000/settings_api/UserSettings/${userid}/`;
-
   const BASEAPI ="http://127.0.0.1:8000/api/"
-
   const BASE_WS_URL = `ws://127.0.0.1:8000/` 
 
   async function getSettings (url = SETTINGSURL) {
@@ -45,8 +43,6 @@ export default function AuthContext({ children }) {
     console.log(res.data);
     return res.data;
   }
-
-  
 
   function UserApi(URL =`${BASEAPI}users/`){
     const api = axios.create({
@@ -105,50 +101,9 @@ export default function AuthContext({ children }) {
     }
   }
 
-    console.log('AuthProvider RENDER');
-
-  //первоначальная загрузка
-  useEffect(() => {
-    console.log('AuthProvider useEffect START');
-    try {
-      getSettings().then((res) => {
-        setLangChoiceList(res.language_choices);
-        setLocal(res.locale);
-        setSettingparams({user:res.user,language:res.language,theme:res.theme});
-      });
-      console.log('useEffect');
-      console.log(localStorage.getItem('access'));
-      (async()=>
-      {
-        let access  = localStorage.getItem('access');
-        let refresh = localStorage.getItem('refresh');
-        
-        if(!access || !refresh){
-          // временно 
-          const t = await UserApi().token({ username: "User_228", password: "MyPassword123" });
-
-          access = t.access; refresh = t.refresh;
-          localStorage.setItem("access", access);
-          localStorage.setItem("refresh", refresh);
-        }
-        else{
-          try{
-            console.log('try', JWTaccessToken)
-            await  UserApi().tokenVerify()
-          }
-          catch{
-            const newtoken = await UserApi().tokenRefresh();
-            console.log(newtoken)
-            setToken({JWTrefreshToken,JWTaccessToken:newtoken});
-            localStorage.setItem("access", newtoken.access);
-          }
-         
-         
-        }
-
-        console.log('token',access);
-      
-        const me = await UserApi().getMe();
+  async function GetChatList() {
+    console.log('GetChatList');
+    const me = await UserApi().getMe();
         setMe(me);
         setUserid(me.id);
         console.log('me',me);
@@ -167,6 +122,53 @@ export default function AuthContext({ children }) {
           })
         );
         setChatList(finalchat)
+
+        console.log('finalchat',finalchat);
+  }
+
+
+  //первоначальная загрузка
+  useEffect(() => {
+    console.log('AuthProvider useEffect START');
+    try {
+      getSettings().then((res) => {
+        setLangChoiceList(res.language_choices);
+        setLocal(res.locale);
+        setSettingparams({user:res.user,language:res.language,theme:res.theme});
+      });
+      (async()=>
+      {
+        let access  = localStorage.getItem('access');
+        let refresh = localStorage.getItem('refresh');
+        
+        if (!access || access === 'null' || access === 'undefined' || !refresh || refresh === 'null' || refresh === 'undefined'
+){
+          // временно 
+          const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
+
+          access = t.access; refresh = t.refresh;
+          localStorage.setItem("access", access);
+          localStorage.setItem("refresh", refresh);
+          setToken({JWTaccessToken: access,JWTrefreshToken: refresh,});
+        }
+        else{
+          try{
+            console.log('try', JWTaccessToken)
+            await  UserApi().tokenVerify()
+          }
+          catch{
+            const newtoken = await UserApi().tokenRefresh();
+            console.log(newtoken)
+            setToken({JWTrefreshToken,JWTaccessToken:newtoken});
+            localStorage.setItem("access", newtoken.access);
+          }
+         await GetChatList();
+         
+        }
+
+        console.log('token',access);
+      
+        
       })();
       
     }
@@ -175,6 +177,15 @@ export default function AuthContext({ children }) {
     }
   
   }, []);
+
+//первоначальная загрузка, загрузка чатов, когда был проверен токен
+  useEffect(() => {
+    (async () => {
+      console.log('AuthProvider useEffect for chat START');
+      GetChatList();
+    })();
+    
+  },[JWTaccessToken]);
 
 
   const first = useRef(true);

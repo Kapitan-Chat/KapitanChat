@@ -5,8 +5,20 @@ import styles from './authentication.module.css';
 import Login from './login';
 import Register from './register';
 
+import { useAuth } from '../Provider/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+
 const Authentication = () => {
     const [mousePos, setMousePos] = useState({x: 0, y: 0});
+
+    const {
+        token,
+        setToken,
+
+        login
+    } = useAuth();
+
+    const navigate = useNavigate();
 
     // Поля для форми Логіну
     const [loginUsername, setLoginUsername] = useState('');
@@ -162,6 +174,67 @@ const Authentication = () => {
         
     }
 
+    // Запит на створення нового юзера. При успішному створенні одразу переходить до входу
+    function RegisterRequest(details){
+
+        axios.post('http://127.0.0.1:8000/api/users/register/', details)
+        .then(response => {
+
+        console.log("Реєстрація успішна!");
+
+        LoginRequest({
+            "username" : details["username"],
+            "password" : details["password"]
+        });
+
+        })
+        .catch(error => {
+
+        console.error('There was an error!', error);
+        
+        if([registerUsername, firstName, email, registerPassword].includes('')){
+            bubble_text_animate("Fill in all the fields!");
+            angry_animation();
+            return;
+        }else if(registerConfirmPassword != registerPassword){
+            bubble_text_animate("Passwords do not match!");
+            angry_animation();
+            return;
+        }
+
+        });
+    }
+
+    // Запит на перевірку вхідних данних та отримання JWT
+    function LoginRequest(details){
+        axios.post('http://127.0.0.1:8000/api/users/token/', details)
+        .then(response => {
+            console.log("Вхід успішний!", response.data);
+            
+            const access = response.data.access;
+            const refresh = response.data.refresh;
+
+            localStorage.setItem("access", access);
+            localStorage.setItem("refresh", refresh);
+            
+            setToken({
+                JWTaccessToken: access,JWTrefreshToken: refresh
+            });
+
+            login();
+            
+            bubble_text_animate("Welcome!");
+            happy_animation();
+
+            navigate('/main');
+        })
+        .catch(error => {
+            console.error('There was an error!', error);
+            bubble_text_animate("Wrong username or password! Are you a hacker??");
+            angry_animation();
+        });
+    }
+
     function handleSubmit(e){
         e.preventDefault();
 
@@ -180,58 +253,12 @@ const Authentication = () => {
         };
 
         if(authType === 'register'){
-            axios.post('http://127.0.0.1:8000/api/users/register/', registerDetails)
-                .then(response => {
-                        console.log("Реєстрація успішна!");
-                        axios.post('http://127.0.0.1:8000/api/users/token/', (
-                    // Надсилаються деталі залежно від типу форми
-                    authType === 'login' ? loginDetails : {"username" : registerUsername, "password" : registerPassword}
-                ))
-                .then(response => {
-                    console.log("Вхід успішний!", response.data);
-                    localStorage.setItem("access", response.data.access);
-                    localStorage.setItem("refresh", response.data.refresh);
-                    bubble_text_animate("Welcome!");
-                    happy_animation();
-                })
-                .catch(error => {
-                    console.error('There was an error!', error);
-                    bubble_text_animate("Wrong username or password! Are you a hacker??");
-                    angry_animation();
-                });
-                return;
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-                if([registerUsername, firstName, email, registerPassword].includes('')){
-                    bubble_text_animate("Fill in all the fields!");
-                    angry_animation();
-                    return;
-                }else if(registerConfirmPassword != registerPassword){
-                    bubble_text_animate("Passwords do not match!");
-                    angry_animation();
-                    return;
-                }
-            });
+            RegisterRequest(registerDetails);
         }
 
         if(authType == 'login'){
-             axios.post('http://127.0.0.1:8000/api/users/token/', (
-                // Надсилаються деталі залежно від типу форми
-                authType === 'login' ? loginDetails : {"username" : registerUsername, "password" : registerPassword}
-            ))
-            .then(response => {
-                console.log("Вхід успішний!", response.data);
-                localStorage.setItem("access", response.data.access);
-                localStorage.setItem("refresh", response.data.refresh);
-                bubble_text_animate("Welcome!");
-                happy_animation();
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-                bubble_text_animate("Wrong username or password! Are you a hacker??");
-                angry_animation();
-            });
+            LoginRequest(loginDetails);
+            
         }
     }
 

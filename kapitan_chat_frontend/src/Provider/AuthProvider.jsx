@@ -1,37 +1,61 @@
 
-import { createContext, useState, useEffect,useContext,useRef } from "react";
+import { 
+  createContext, useState, useEffect, useContext, useRef
+} from "react";
+
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 const context = createContext({});
 
 export default function AuthContext({ children }) {
 
-  const [{JWTaccessToken,JWTrefreshToken}, setToken] = useState(
-    {JWTaccessToken:localStorage.getItem('access'),JWTrefreshToken:localStorage.getItem('refresh')});
+
+
+  // Оголошення змінних/хуків
+
+  const [{JWTaccessToken,JWTrefreshToken}, setToken] = useState({
+    JWTaccessToken:localStorage.getItem('access'),
+    JWTrefreshToken:localStorage.getItem('refresh')
+  });
+
+  const navigate = useNavigate();
 
   const [userid, setUserid] = useState(1);
   const [me, setMe] = useState({});
 
   const [langChoiceList, setLangChoiceList] = useState([]);
   const [local, setLocal] = useState({});
+
   //theme true is dark false is light
   const [settingparams, setSettingparams] = useState({user:1,language:"en",theme:false});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [chatList, setChatList] = useState([
-              {img:"https://randomuser.me/api/portraits/men/41.jpg",
-              lastMessage:"Hello",
-              name:"John",
-              userId:1},
-              {img:"https://randomuser.me/api/portraits/men/6.jpg",
-              lastMessage:"eshkere",
-              name:"Jecky",
-              userId:2},
-      ]);
+    {
+      img : "https://randomuser.me/api/portraits/men/41.jpg",
+      lastMessage : "Hello",
+      name : "John",
+      userId : 1
+    },
+    {
+      img : "https://randomuser.me/api/portraits/men/6.jpg",
+      lastMessage : "eshkere",
+      name : "Jecky",
+      userId : 2
+    },
+  ]);
   
   
   const SETTINGSURL = `http://127.0.0.1:8000/settings_api/UserSettings/${userid}/`;
   const BASEAPI ="http://127.0.0.1:8000/api/"
   const BASE_WS_URL = `ws://127.0.0.1:8000/` 
+
+  // Кінець оголошення змінних/хуків
+
+
+
+  // Функції
 
   async function getSettings (url = SETTINGSURL) {
     const res = await axios.get(url);
@@ -141,8 +165,15 @@ export default function AuthContext({ children }) {
         let access  = localStorage.getItem('access');
         let refresh = localStorage.getItem('refresh');
         
-        if (!access || access === 'null' || access === 'undefined' || !refresh || refresh === 'null' || refresh === 'undefined'
-){
+        // Перевірка на дійсність та наявність JWT
+        if (
+          (!access || access === 'null' || access === 'undefined') || 
+          (!refresh || refresh === 'null' || refresh === 'undefined')
+        ){
+          console.log("JWT Token inalid or abscent!");
+          // Перенаправлення на авторизацію
+          // navigate('/authorization');
+
           // временно 
           const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
 
@@ -162,13 +193,9 @@ export default function AuthContext({ children }) {
             setToken({JWTrefreshToken,JWTaccessToken:newtoken});
             localStorage.setItem("access", newtoken.access);
           }
-         await GetChatList();
-         
+          await GetChatList();
         }
-
         console.log('token',access);
-      
-        
       })();
       
     }
@@ -203,7 +230,6 @@ export default function AuthContext({ children }) {
     setIsAuthenticated(auth);
   }, []);
 
-
   const login = () => {
     localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
@@ -214,6 +240,12 @@ export default function AuthContext({ children }) {
     localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
   };
+
+  // Закінчення функцій
+
+
+
+  // Готування даних для передачі у контекст
 
   const value = {
     isAuthenticated,
@@ -239,7 +271,18 @@ export default function AuthContext({ children }) {
     UserApi,
     ChatApi,
     MessageApi,
+
+    JWTaccessToken,
+    JWTrefreshToken,
+    setToken
   }
+
+  // Кінець готування об'єкту
+
+
+
+  // Повернення готового провайдера
+
   return (
     <context.Provider value={value}>
       {children}

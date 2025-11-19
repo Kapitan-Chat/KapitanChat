@@ -1,6 +1,8 @@
 import { useEffect,useState } from "react";
 import ChatList from "./ChatList";
 
+import search_icon from "../assets/search_icon.png";
+
 /**
  * Компонент для поиска чатов
  * @param {object} props - Параметры компонента
@@ -30,30 +32,30 @@ export default function Search({chatList}) {
 
     console.log(searchResult);
     return (
-        <div className="search-conteiner" style={{ position: "relative", width: 320 }}>
+        <div className="search-container">
         
-        <div className="search-bar" style={{alignItems:'center', display:'flex'}}>
-            <input  type="text" className="form-control message-input" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-            <button type="button" className="btn btn-primary search search-icon"><i className="fas fa-search"></i></button>
-        </div>
+        <input  type="text" className="sidebar-top-search" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <img type="button" className="search-icon" src={search_icon} />
         
         {
             searchResult.length > 0 &&
                 (
-                    <div style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            left: 0,
-            right: 0,                 // ширина равна поиску
-            background: "#cac8c8ff",
-            border: "1px solid #333",
-            borderRadius: 8,
-            maxHeight: 460,
-            overflow: "auto",
-            zIndex: 1000,
-            padding: 8,
-            alignItems: "center",
-            }}>
+                    <div 
+                        style={{
+                            position: "absolute",
+                            top: "calc(100% + 6px)",
+                            left: 0,
+                            right: 0,                 // ширина равна поиску
+                            background: "#cac8c8ff",
+                            border: "1px solid #333",
+                            borderRadius: 8,
+                            maxHeight: 460,
+                            overflow: "auto",
+                            zIndex: 1000,
+                            padding: 8,
+                            alignItems: "center",
+                        }}
+                    >
                         
                         <ChatList chatList={searchResult}/>
                     </div>

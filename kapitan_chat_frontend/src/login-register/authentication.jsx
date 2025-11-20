@@ -22,6 +22,9 @@ const Authentication = () => {
         setLoginPassword
     };
 
+
+    
+
     // Поля для форми Реєстрації
     const [registerUsername, setRegisterUsername] = useState('');
     const [email, setEmail] = useState('');

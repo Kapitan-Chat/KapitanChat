@@ -12,24 +12,26 @@ export default function AuthContext({ children }) {
   const [me, setMe] = useState({});
 
   const [langChoiceList, setLangChoiceList] = useState([]);
+  
   const [local, setLocal] = useState({});
   //theme true is dark false is light
   const [settingparams, setSettingparams] = useState({user:1,language:"en",theme:false});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [chatList, setChatList] = useState([
-              {img:"https://randomuser.me/api/portraits/men/41.jpg",
-              lastMessage:"Hello",
-              name:"John",
-              userId:1},
-              {img:"https://randomuser.me/api/portraits/men/6.jpg",
-              lastMessage:"eshkere",
-              name:"Jecky",
-              userId:2},
-      ]);
+  // const [chatList, setChatList] = useState([
+  //             {img:"https://randomuser.me/api/portraits/men/41.jpg",
+  //             lastMessage:"Hello",
+  //             name:"John",
+  //             userId:1},
+  //             {img:"https://randomuser.me/api/portraits/men/6.jpg",
+  //             lastMessage:"eshkere",
+  //             name:"Jecky",
+  //             userId:2},
+  //     ]);
+  const [chatList, setChatList] = useState([]);
   
   
-  const SETTINGSURL = `http://127.0.0.1:8000/settings_api/UserSettings/${userid}/`;
+  const SETTINGSURL = `http://127.0.0.1:8000/api/settings/${userid}/`;
   const BASEAPI ="http://127.0.0.1:8000/api/"
   const BASE_WS_URL = `ws://127.0.0.1:8000/` 
 
@@ -153,12 +155,11 @@ export default function AuthContext({ children }) {
         }
         else{
           try{
-            console.log('try', JWTaccessToken)
             await  UserApi().tokenVerify()
           }
           catch{
             const newtoken = await UserApi().tokenRefresh();
-            console.log(newtoken)
+            
             setToken({JWTrefreshToken,JWTaccessToken:newtoken});
             localStorage.setItem("access", newtoken.access);
           }
@@ -181,7 +182,6 @@ export default function AuthContext({ children }) {
 //первоначальная загрузка, загрузка чатов, когда был проверен токен
   useEffect(() => {
     (async () => {
-      console.log('AuthProvider useEffect for chat START');
       GetChatList();
     })();
     

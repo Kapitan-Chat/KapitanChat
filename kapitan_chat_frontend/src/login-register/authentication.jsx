@@ -5,6 +5,9 @@ import styles from './authentication.module.css';
 import Login from './login';
 import Register from './register';
 
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../Provider/AuthProvider';
+
 const Authentication = () => {
     const [mousePos, setMousePos] = useState({x: 0, y: 0});
 
@@ -188,11 +191,20 @@ const Authentication = () => {
                     authType === 'login' ? loginDetails : {"username" : registerUsername, "password" : registerPassword}
                 ))
                 .then(response => {
+                    //*
+                    const { setToken } = useAuth();
+                    const nav = useNavigate();
+                    //*
                     console.log("Вхід успішний!", response.data);
                     localStorage.setItem("access", response.data.access);
                     localStorage.setItem("refresh", response.data.refresh);
+
+                    setToken({JWTaccessToken:response.data.access,JWTrefreshToken:response.data.refresh});
+
                     bubble_text_animate("Welcome!");
                     happy_animation();
+
+                    nav('/main');
                 })
                 .catch(error => {
                     console.error('There was an error!', error);

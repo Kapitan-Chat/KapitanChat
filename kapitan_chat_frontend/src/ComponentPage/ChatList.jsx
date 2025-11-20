@@ -11,7 +11,7 @@ export default function ChatList({chatList,setChatId}) {
     useEffect(() => {}, [chatList]);
     return (
         <>
-        {chatList.length === 0?(<h1>no chat now</h1>):(
+        {chatList.length === 0?(<h1 className="no-chats">No chats</h1>):(
             <div className="chats-container">
             {chatList.map((chat) => (
                 <div className={`chat-item${chat.active ? " active" : ""}`} key={chat.id} onClick={()=>setChatId(chat.id)}>

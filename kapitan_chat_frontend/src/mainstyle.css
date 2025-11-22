@@ -1,9 +1,11 @@
-:root[data-bs-theme="light"] {
+/* :root[data-bs-theme="light"] {
         * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
+} */
+
+@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Taviraj:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 
 body {
     background: #001b92;
@@ -11,17 +13,6 @@ body {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-}
-
-.app-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    background: #001b92;
-    overflow: visible;
-    position: relative;
-    padding: 20px;
-    gap: 15px;
 }
 
 /* Кнопка переключения панели */
@@ -56,15 +47,6 @@ body {
     display: flex;
     flex-direction: column;
     overflow: visible;
-}
-
-/* Поиск с профилем - более округлый */
-.search-container {
-    
-    padding: 0;
-    margin-bottom: 15px;
-    width: 95%;
-    height: 80px;
 }
 
 .search-bar {
@@ -117,21 +99,6 @@ body {
     color: rgba(0, 0, 0, 0.55);
 }
 
-.search-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(217, 217, 217, 0.5);
-    border-radius: 50%; /* Круглая иконка */
-}
-
-.search-icon i {
-    color: rgba(0, 0, 0, 0.7);
-    font-size: 14px;
-}
-
 /* Список чатов - более компактные */
 .chats-container {
     flex: 1;
@@ -148,20 +115,19 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border-radius: 20px; /* Более округлый */
-    background: rgba(217, 217, 217, 0.6);
+    background: rgba(217, 217, 217, 0.35);
     margin-bottom: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     width: 80%;
-    margin-left: 5%;
 }
 
 .chat-item:hover {
-    background: rgba(217, 217, 217, 0.7);
+    background: rgba(217, 217, 217, 0.6);
     transform: translateY(-2px);
 }
 
 .chat-item.active {
-    background: rgba(217, 217, 217, 0.9);
+    background: rgba(217, 217, 217, 0.7);
     border-left: 4px solid #001b92;
 }
 
@@ -473,9 +439,6 @@ body {
     .chat-list-sidebar {
         width: 320px;
     }
-    .app-container {
-        padding: 15px;
-    }
 }
 
 @media (max-width: 900px) {
@@ -485,10 +448,6 @@ body {
 }
 
 @media (max-width: 768px) {
-    .app-container {
-        padding: 0;
-        gap: 0;
-    }
     
     .toggle-sidebar {
         display: flex;
@@ -566,12 +525,9 @@ body {
 .settings{
     background-color: #c3c3c3e2;
 }
-}
 
 :root[data-bs-theme="dark"] {
         * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
@@ -581,17 +537,6 @@ body {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-}
-
-.app-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    background: #001b92;
-    overflow: hidden;
-    position: relative;
-    padding: 20px;
-    gap: 15px;
 }
 
 /* Кнопка переключения панели */
@@ -627,14 +572,6 @@ body {
     display: flex;
     flex-direction: column;
     overflow: visible;
-}
-
-/* Поиск с профилем - черный */
-.search-container {
-    padding: 0;
-    margin-bottom: 15px;
-    width: 95%;
-    height: 80px;
 }
 
 .search-bar {
@@ -687,21 +624,6 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
-.search-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-}
-
-.search-icon i {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 14px;
-}
-
 /* Список чатов - черные */
 .chats-container {
     flex: 1;
@@ -718,16 +640,14 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border-radius: 20px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.35);
     margin-bottom: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     width: 80%;
-    height: 10%;
-    margin-left: 5%;
 }
 
 .chat-item:hover {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     transform: translateY(-2px);
 }
 
@@ -1058,9 +978,6 @@ button:active {
     .chat-list-sidebar {
         width: 320px;
     }
-    .app-container {
-        padding: 15px;
-    }
 }
 
 @media (max-width: 900px) {
@@ -1070,10 +987,6 @@ button:active {
 }
 
 @media (max-width: 768px) {
-    .app-container {
-        padding: 0;
-        gap: 0;
-    }
     
     .toggle-sidebar {
         display: flex;
@@ -1220,4 +1133,138 @@ img{
 /* уважение к reduced motion */
 @media (prefers-reduced-motion: reduce){
   .settings-popover{ transition:none; }
+}
+
+/* Панель з аватаром користувача та панеллю пошуку */
+.sidebar-top{
+    margin: 0;
+    padding: 0;
+
+    width: 405px;
+    height: 85px;
+
+    padding-left: 12.5px;
+    padding-right: 12.5px;
+
+    border-radius: 25px;
+
+    background-color: rgba(217, 217, 217, 0.35);
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-top-avatar, .sidebar-top-avatar img{
+    margin: 0;
+    padding: 0;
+
+    border: none !important;
+
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.search-container{
+    width: 317.5px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 0 !important;
+}
+
+.search-container input{
+    margin-left: 20px;
+
+    width: 200px;
+    
+    background-color: transparent;
+    
+    border: none;
+    outline: none;
+
+    font-family: "Inter", sans-serif;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.search-container input::placeholder{
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.search-icon{
+    background: transparent !important;
+    border: none !important;
+
+    width: 60px;
+    height: 60px;
+}
+
+.search-icon:hover{
+    cursor: pointer;
+}
+
+.current-chat{
+    position: relative;
+
+    width: 100% !important;
+    height: 100%;
+
+    border-radius: 10px;
+
+    background-color: rgba(217, 217, 217, 0.35);
+}
+
+.app-container{
+    padding: 40px !important;
+    overflow: hidden;
+
+    background: linear-gradient(to bottom, #272E84, #221B5A);
+
+    width: 100% !important;
+    height: 100% !important;
+
+    position: absolute;
+
+    display: flex;
+    flex-direction: row;
+
+    gap: 100px !important;
+}
+
+.chats-container{
+    width: 405px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.empty-chat{
+    color: rgba(217, 217, 217, 0.35);
+    position: absolute;
+    
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    font-size: 30px;
+    font-family: "Inter", sans-serif;
+}
+
+.no-chats{
+    color: rgba(255, 255, 255, 0.4);
+    width: 100%;
+    text-align: center;
+}
+
+.resize-handle {
+  width: 8px;             
+  background: rgba(216, 9, 9, 0.2);
+  cursor: col-resize;      /* курсор как у разделителя */
 }

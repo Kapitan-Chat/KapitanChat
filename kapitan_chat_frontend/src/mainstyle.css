@@ -1268,3 +1268,15 @@ img{
   background: rgba(216, 9, 9, 0.2);
   cursor: col-resize;      /* курсор как у разделителя */
 }
+
+
+.emoji-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.emoji-picker {
+  position: absolute;
+  bottom: 150%;     /* под кнопкой */
+  right: 0;
+}

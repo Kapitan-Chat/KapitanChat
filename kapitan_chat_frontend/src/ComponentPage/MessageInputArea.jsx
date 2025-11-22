@@ -2,6 +2,13 @@
 import { useState,useRef,useEffect } from "react"
 import { useAuth } from "../Provider/AuthProvider"
 
+
+
+// вресенно 
+
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+
 /**
  * Компонент для ввода сообщения
  * 
@@ -15,6 +22,7 @@ export default function MessageInputArea({setlist,chatid}) {
     const [msg, setmsg] = useState("");
     const wsRef = useRef(null);
 
+    const [showEmoji, setShowEmoji] = useState(false);
     /** соединение с вебсокетом */
     useEffect(() => {
     const ws = new WebSocket(`${BASE_WS_URL}ws/chat?token=${JWTaccessToken}`);
@@ -88,6 +96,7 @@ export default function MessageInputArea({setlist,chatid}) {
                 content: msg
             }
           })
+          setShowEmoji(false);
           setmsg('');
         }
         catch(e){
@@ -96,21 +105,47 @@ export default function MessageInputArea({setlist,chatid}) {
         
     }
 
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+          MessageHandler(e);
+        }
+    }
 
+    function EmojiHandler(data){
+      setmsg(msg + data.native);
+    }
     return(
         <>
-
         <div>
             <h1 id="status"></h1>
         </div>
         <div className="message-input-container">
                 <div className="message-input-wrapper">
+                   
                     <button className="icon-btn"><i className="fas fa-paperclip"></i></button>
                     <label htmlFor="msg"></label>
                     <input type="text" className="message-input" name="message" id="msg" placeholder="Write message..." 
-                    value={msg} onChange={(e) => setmsg(e.target.value)}/>
+                    value={msg} onChange={(e) => setmsg(e.target.value)} onKeyDown={(e) => handleKeyDown(e)}/>
                     <div className="input-actions">
-                        <button className="icon-btn"><i className="far fa-smile"></i></button>
+                       
+                      <div className="emoji-wrapper">
+        {showEmoji && (
+          <div className="emoji-picker">
+            <Picker
+              data={data}
+              onEmojiSelect={(emoji) => EmojiHandler(emoji)}
+            />
+          </div>
+        )}
+
+        <button
+          className="icon-btn"
+          onClick={() => setShowEmoji((v) => !v)}
+        >
+          <i className="far fa-smile"></i>
+        </button>
+      </div>
+
                         <button className="send-button" onClick={(e) => (MessageHandler(e))}><i className="fas fa-paper-plane"></i></button>
                     </div>
                 </div>

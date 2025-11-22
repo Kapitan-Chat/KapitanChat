@@ -14,6 +14,7 @@ const Authentication = () => {
     const {
         token,
         setToken,
+        setIsAuthenticated,
 
         login
     } = useAuth();
@@ -228,7 +229,7 @@ const Authentication = () => {
             
             bubble_text_animate("Welcome!");
             happy_animation();
-
+            setIsAuthenticated(true);
             navigate('/main');
         })
         .catch(error => {
@@ -283,6 +284,9 @@ const Authentication = () => {
     }
 
     function bubble_text_animate(text){
+        // //ошибка
+        // return 0;
+
         if(chatBubbleRef.current && text && !bubble_chat_animation){
             bubble_chat_animation = true;
             let currentText = "Kapitan$\n\n";

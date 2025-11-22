@@ -170,25 +170,35 @@ export default function AuthContext({ children }) {
         ){
           console.log("JWT Token inalid or abscent!");
           // Перенаправлення на авторизацію
-          // navigate('/authorization');
+          navigate('/authorization');
+          setIsAuthenticated(false);
 
-          // временно 
-          const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
+          // // временно 
+          // const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
 
-          access = t.access; refresh = t.refresh;
-          localStorage.setItem("access", access);
-          localStorage.setItem("refresh", refresh);
-          setToken({JWTaccessToken: access,JWTrefreshToken: refresh,});
+          // access = t.access; refresh = t.refresh;
+          // localStorage.setItem("access", access);
+          // localStorage.setItem("refresh", refresh);
+          // setToken({JWTaccessToken: access,JWTrefreshToken: refresh,});
         }
         else{
           try{
             await  UserApi().tokenVerify()
           }
+          // проверка на действительность токена, если нет то выдает 401 и срабатывает catch
           catch{
-            const newtoken = await UserApi().tokenRefresh();
+            try{
+              const newtoken = await UserApi().tokenRefresh();
             
-            setToken({JWTrefreshToken,JWTaccessToken:newtoken});
-            localStorage.setItem("access", newtoken.access);
+              setToken({JWTrefreshToken,JWTaccessToken:newtoken});
+              localStorage.setItem("access", newtoken.access);
+            }
+            // проверка на действительность токена, если нет то выдает 401 и срабатывает catch
+            catch{
+              isAuthenticated(false);
+              navigate('/authorization');
+            }
+            
           }
           await GetChatList();
         }

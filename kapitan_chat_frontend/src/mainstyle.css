@@ -1262,3 +1262,9 @@ img{
     width: 100%;
     text-align: center;
 }
+
+.resize-handle {
+  width: 8px;             
+  background: rgba(216, 9, 9, 0.2);
+  cursor: col-resize;      /* курсор как у разделителя */
+}

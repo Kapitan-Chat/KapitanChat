@@ -11,17 +11,6 @@ from .serializers import MessageSerializer, ChatSerializer, AttachmentSerializer
 from drf_spectacular.utils import extend_schema
 
 # Create your views here.
-def list_permitted(self, qs):
-    queryset = qs
-
-    page = self.paginate_queryset(queryset)
-    if page is not None:
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
-
-    serializer = self.get_serializer(queryset, many=True)
-    return Response(serializer.data)
-
 @extend_schema(tags=['messages'])
 class MessageView(ModelViewSet):
     """
@@ -86,13 +75,13 @@ class MessageView(ModelViewSet):
         elif offset > 0:
             query_base = query_base[offset:]
 
-        return list_permitted(self, query_base)
+        return Response(MessageSerializer(query_base, many=True, request_user_id=request.user.id).data)
 
     def retrieve(self, request, *args, **kwargs):
         instance: Message = self.get_object()
         if request.user.id not in instance.chat.users:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(instance)
+        serializer = MessageSerializer(instance, request_user_id=request.user.id)
         return Response(serializer.data)
 
 @extend_schema(tags=['chat'])
@@ -119,19 +108,13 @@ class ChatView(mixins.CreateModelMixin,
         if request.GET.get('reverse', 'false').lower() == 'true':
             query = query.reverse()
         data = query.all()
-        for c in data:
-            if c.type == ChatType.DIRECT:
-                for u in c.users.all():
-                    if u.id != request.user.id:
-                        c.name = u.first_name + (" " + u.last_name if u.last_name else "")
-                        c.description = u.profile.bio
-        return Response(ChatSerializer(data, many=True).data)
+        return Response(ChatSerializer(data, many=True, request_user_id=request.user.id).data)
 
     def retrieve(self, request, *args, **kwargs):
         instance: Chat = self.get_object()
-        if request.user.id not in instance.users:
+        if request.user.id not in [us.id for us in instance.users.all()]:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(instance)
+        serializer = ChatSerializer(instance, request_user_id=request.user.id)
         return Response(serializer.data)
 
 @extend_schema(tags=['attachments'])

@@ -3,12 +3,17 @@ from typing import Any
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from users_api.serializers import UserSerializer
 from .models import Message, Chat, Attachment, ChatType
 
 
 class ChatSerializer(serializers.ModelSerializer):
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.request_user_id = kwargs.pop('request_user_id', None)
+        super().__init__(instance, data, **kwargs)
+
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         if data['created_by'] not in data['users']:
             raise serializers.ValidationError("Chat must include user that created it")
@@ -26,6 +31,17 @@ class ChatSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(data['type'] + " should have name.")
 
         return data
+
+    def to_representation(self, instance: Chat):
+        print(self.request_user_id)
+        if self.request_user_id and instance.type == ChatType.DIRECT:
+            for u in instance.users.all():
+                if u.id != self.request_user_id:
+                    instance.name = u.first_name + (" " + u.last_name if u.last_name else "")
+                    instance.description = u.profile.bio
+        res = super().to_representation(instance)
+        print(res)
+        return res
 
     class Meta:
         model = Chat
@@ -46,6 +62,9 @@ class MessageSerializer(serializers.ModelSerializer):
     chat_id: int = serializers.PrimaryKeyRelatedField(write_only=True, required=True, queryset=Chat.objects.all(), source='chat')
     chat: Chat = ChatSerializer(read_only=True)
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.request_user_id = kwargs.pop('request_user_id', None)
+        super().__init__(instance, data, **kwargs)
 
     def validate(self, attributes: dict[str, Any]) -> dict[str, Any]:
         if not Chat.objects.filter(users__id=attributes['user'].id, id=attributes['chat'].id).exists():
@@ -61,6 +80,11 @@ class MessageSerializer(serializers.ModelSerializer):
         message.chat.save()
 
         return message
+
+    def to_representation(self, instance: Message):
+        serialized = super().to_representation(instance)
+        serialized['chat'] = ChatSerializer(instance.chat, read_only=True, request_user_id=self.request_user_id).data
+        return serialized
 
     class Meta:
         model = Message

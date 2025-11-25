@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -11,7 +11,9 @@ from rest_framework.views import APIView
 import logging
 
 from chat_main_api.models import Chat
-from .serializers import RegisterSerializer, UserSerializer
+from .models import Profile
+from .permissions import IsSelfRequest
+from .serializers import RegisterSerializer, UserSerializer, ProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -83,3 +85,9 @@ class SearchApiView(RetrieveAPIView):
         users = User.objects.filter(Q(username__icontains=query) | Q(profile__phone_number=query) | Q(email=query))[:5]
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+
+class ProfileView(UpdateAPIView):
+    permission_classes = (IsAuthenticated, IsSelfRequest)
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer

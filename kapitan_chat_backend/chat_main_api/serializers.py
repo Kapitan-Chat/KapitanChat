@@ -57,8 +57,7 @@ class AttachmentSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     user: User = UserSerializer(read_only=True)
     user_id: int = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, source='user')
-    attachments: list[Attachment] = AttachmentSerializer(many=True, read_only=True)
-    attachment_ids: list[Attachment] = serializers.PrimaryKeyRelatedField(many=True, queryset=Attachment.objects.all(), write_only=True, source='attachments')
+    attachments: list[Attachment] = AttachmentSerializer(many=True, allow_null=True)
     chat_id: int = serializers.PrimaryKeyRelatedField(write_only=True, required=True, queryset=Chat.objects.all(), source='chat')
     chat: Chat = ChatSerializer(read_only=True)
 
@@ -75,7 +74,10 @@ class MessageSerializer(serializers.ModelSerializer):
         attachments = validated_data.pop('attachments', [])
         message = Message.objects.create(**validated_data)
         if attachments:
-            message.attachments.set(attachments)
+            attachments = [Attachment.objects.create(**obj) for obj in attachments]
+            for a in attachments:
+                a.message = message
+                a.save()
         message.chat.updated_at = datetime.now(tz=timezone.utc)
         message.chat.save()
 

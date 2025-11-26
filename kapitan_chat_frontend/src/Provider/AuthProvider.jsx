@@ -24,6 +24,14 @@ export default function AuthContext({ children }) {
   const [userid, setUserid] = useState(1);
   const [me, setMe] = useState({});
 
+  const [chatId, setChatId] = useState(null);
+
+  const [userSearchActive, setUserSearchActive] = useState(false); 
+  const [messageSearchActive, setMessageSearchActive] = useState(false); 
+  const [groupchatUserSearchActive, setGroupchatUserSearchActive] = useState(false); 
+
+  const [addGroupUsers, setAddGroupUsers] = useState([]);
+
   const [langChoiceList, setLangChoiceList] = useState([]);
   
   const [local, setLocal] = useState({});
@@ -82,7 +90,7 @@ export default function AuthContext({ children }) {
       token: async ({username, password}) => (await api.post('token/', {username, password})).data,
       tokenRefresh: async () => api.post('token/refresh/', {refresh: JWTrefreshToken}).then((res) => res.data),
       tokenVerify: async () => api.post('token/verify/', {token: JWTaccessToken}).then((res) => res.data),
-
+      search: async (name) => api.get(`search/?query=${encodeURIComponent(name)}`).then((res) => res.data)
     }
   }
 
@@ -251,6 +259,11 @@ export default function AuthContext({ children }) {
 
     userid,
     me,
+
+    chatId,
+    setChatId,
+
+    GetChatList,
     
     chatList,
     setChatList,
@@ -271,7 +284,17 @@ export default function AuthContext({ children }) {
 
     JWTaccessToken,
     JWTrefreshToken,
-    setToken
+    setToken,
+
+    userSearchActive,
+    setUserSearchActive,
+    messageSearchActive,
+    setMessageSearchActive,
+    groupchatUserSearchActive,
+    setGroupchatUserSearchActive,
+
+    addGroupUsers,
+    setAddGroupUsers
   }
 
   // Кінець готування об'єкту

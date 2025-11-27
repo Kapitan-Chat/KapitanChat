@@ -4,7 +4,7 @@ import Search from '../ComponentPage/Search';
 import ChatArea from '../ComponentPage/ChatArea';
 import SettingsList from '../ComponentPage/SettingsComp/SettingsList';
 import  {useAuth}  from '../Provider/AuthProvider';
-import { useState,useEffect,useMemo } from 'react';
+import { useState,useEffect,useMemo,useRef } from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
@@ -15,17 +15,36 @@ export default function Main() {
   const navigate = useNavigate();
   if(!isAuthenticated) navigate("/authorization");
   
-  
+  const [showMenu, setShowMenu] = useState(false);
   const [show, setShow] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
+
   const [chatId, setChatId] = useState(null);
   const [cntrchatId, setCntrchatId] = useState(null);
   const [chat, setChat] = useState(null);
   const [secondchat, setSecondChat] = useState(null);
 
+  const widthref = useRef(null);
   
+  useEffect(() => {
+    function handleResize() {
+      if (widthref.current.offsetWidth <= 800) {
+      setShowBackButton(true);
+    }
+    else{
+      setShowBackButton(false);
+    }
+    }
+    handleResize();
+    window.addEventListener('resize',handleResize)
+    return () => window.removeEventListener('resize',handleResize)
+    
+  },[])
+
   
   useEffect(() => {
     console.log('chatId',chatId);
+    setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
     setChat(chatList.find((chat) => chat.id === chatId));
     console.log('chat',chatList);
@@ -33,10 +52,16 @@ export default function Main() {
 
   useEffect(() => {
     console.log('cntrchatId',cntrchatId);
+    setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
     setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
     console.log('chat',chatList);
   }, [cntrchatId]);
+
+
+  useEffect( () =>{
+    console.log("showmenu",showMenu)
+  },[showMenu])
 
 
 
@@ -50,7 +75,7 @@ export default function Main() {
       const c = chatId ? chat : secondchat;
       return(
         <>
-        <ChatArea chatId={cId} chat={c} />
+        <ChatArea chatId={cId} chat={c} showBackButton={showBackButton} setBackButtonReaction={setShowMenu} />
         </>
       );
     }
@@ -77,10 +102,10 @@ export default function Main() {
   const appcontstyle = useMemo(() => ({ padding: "20px", display: "flex",gap:"30px" }),[])
  
   return (
-    <div className="app-container" style={appcontstyle}>
+    <div className="app-container" style={appcontstyle} ref={widthref}>
 
       {/* боковое меню с переченью чатов и кнопка настроек и поиск  */}
-      <section  className="chat-list-sidebar" style={chatSectionStyle} >
+      <section  className={"chat-list-sidebar" +  (showMenu ? "active" : "") } style={chatSectionStyle} >
         <div className='sidebar-top'>
           <SettingsList isShow={show} setShow={setShow} >
               
@@ -99,12 +124,17 @@ export default function Main() {
         </div>
         <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId} />
       </section>
+
+      {!showMenu && <>
+
       {/* содержимое чата click */}
       <section className='current-chat'>
         
         {handlerChatOpen()}
         
       </section>
+      </>}
+      
       
     </div>
 

@@ -284,8 +284,7 @@ const Authentication = () => {
     }
 
     function bubble_text_animate(text){
-        // //ошибка
-        // return 0;
+   
 
         if(chatBubbleRef.current && text && !bubble_chat_animation){
             bubble_chat_animation = true;
@@ -313,9 +312,11 @@ const Authentication = () => {
     }
 
     useEffect(() => {
-        setTimeout(() => {
+        const st = setTimeout(() => {
             bubble_text_animate("Welcome to Kapitan Chat! Login or register")
         }, 500)
+        
+        return ()=>{clearTimeout(st)}
     }, []);
 
 

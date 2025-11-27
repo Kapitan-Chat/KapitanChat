@@ -4,10 +4,18 @@ import { useEffect, useState } from "react";
 import Search from "./Search";
 
 
+
 /**
- * компонент чата отвечающий за отображение чата
+ * Компонент для отображения чата
+ * 
+ * @param {number} chatId - идентификатор чата
+ * @param {object} chat - объект с информацией о чате
+ * @param {boolean} showBackButton - true если нужно отображать кнопку назад
+ * @param {function} setBackButtonReaction - функция для обновления состояния кнопки назад
+ * 
+ * @returns {React.Component} - компонент для отображения чата
  */
-export default function ChatArea({chatId,chat}) {
+export default function ChatArea({chatId,chat,showBackButton,setBackButtonReaction}) {
 
     const [messagelist, setMessagelist] = useState([]);
     const{me,MessageApi} = useAuth();
@@ -83,8 +91,11 @@ export default function ChatArea({chatId,chat}) {
                     <h1>LOAD</h1>
                 ):
                 <>
+                
                  <div class="chat-header-area" style={{gap:'10px'}}>
+                    
                 <div class="chat-user-info">
+                    {showBackButton && <div class="back-button" onClick={() =>(setBackButtonReaction((perv)=>!perv))}><i class="fas fa-arrow-left"></i></div>}
                     <div className="chat-user-avatar">{Avatar()}</div>
                     <div>
                         <div className="chat-user-name">{chat.name}</div>

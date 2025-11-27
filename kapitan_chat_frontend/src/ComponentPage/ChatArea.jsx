@@ -83,9 +83,9 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
 
     return (
         
-        <div>
+        <div className="current-chat-wrapper">
             <div className="sidebar-overlay" id="sidebarOverlay"></div>
-            <div class="chat-area">
+            <div className="chat-area">
 
                 {loading ? (
                     <h1>LOAD</h1>
@@ -96,23 +96,25 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                     
                 <div class="chat-user-info">
                     {showBackButton && <div class="back-button" onClick={() =>(setBackButtonReaction((perv)=>!perv))}><i class="fas fa-arrow-left"></i></div>}
+                 <div className="chat-header-area" style={{gap:'10px'}}>
+                <div className="chat-user-info">
                     <div className="chat-user-avatar">{Avatar()}</div>
                     <div>
                         <div className="chat-user-name">{chat.name}</div>
                         {/* <div class="chat-user-status">online</div> */}
                     </div>
                 </div>
-                {isSerch && <Search chatList={GetListForSearch()}/>}
-                <div class="chat-actions">
-                    <button onClick={()=>setIsSerch(!isSerch)} class="icon-btn"> {isSerch ? <i class="fa-solid fa-xmark"></i>:<i class="fas fa-search"></i>} </button>
+                {isSerch && <Search chatlist={GetListForSearch()}/>}
+                <div className="chat-actions">
+                    <button onClick={()=>setIsSerch(!isSerch)} className="icon-btn"> {isSerch ? <i className="fa-solid fa-xmark"></i>:<i className="fas fa-search"></i>} </button>
                     
-                    <button class="icon-btn btn btn-danger"><i class="fas fa-ellipsis-v"></i></button>
+                    <button className="icon-btn btn btn-danger"><i className="fas fa-ellipsis-v"></i></button>
                 </div>
-                
+            </div>
             </div>
 
             
-            <div class="messages-container">
+            <div className="messages-container">
                 
                 {messagelist.map((item)=>{
 
@@ -129,6 +131,7 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                 })}
                 
                 
+            </div>
             </div>
                 </>}
             

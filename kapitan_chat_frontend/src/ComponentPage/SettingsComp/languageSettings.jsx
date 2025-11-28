@@ -8,7 +8,7 @@ export default function LanguageSettings() {
 
     return (
         <>
-        <div className="chat-item  m-1 ">
+        <div className="settings-item  m-1 ">
             <img srcSet="https://www.svgrepo.com/show/327318/language.svg" alt="lang icon" width="50px"  />
             <select name="" id=""defaultValue={settingparams.language} onChange={(e) => setSettingparams({...settingparams,language:e.target.value})}>
                 {langChoiceList.map((item) => {

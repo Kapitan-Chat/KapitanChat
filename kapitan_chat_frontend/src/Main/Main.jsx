@@ -3,18 +3,21 @@ import ChatList from '../ComponentPage/ChatList';
 import Search from '../ComponentPage/Search';
 import ChatArea from '../ComponentPage/ChatArea';
 import SettingsList from '../ComponentPage/SettingsComp/SettingsList';
-import Create from './Create';
+
 
 import  {useAuth}  from '../Provider/AuthProvider';
 import { useState,useEffect,useMemo } from 'react';
+import ProfileSettingsWindow from '../ComponentPage/SettingsComp/profileSettingsWindow';
+import Create from './Create';
+
 import { useNavigate } from 'react-router-dom';
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
 
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
 
- 
-  const { 
+  
+  let { 
     chatList, 
     setChatList, 
     isAuthenticated, 
@@ -55,6 +58,7 @@ export default function Main() {
     console.log('chatId',chatId);
     setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
+    
     setChat(chatList.find((chat) => chat.id === chatId));
     
     console.log('chatList', chatList);
@@ -137,6 +141,8 @@ export default function Main() {
       );
     }
   }
+
+
   const chatSectionStyle = useMemo(() => ({
     display:'flex',gap:"10px",flexDirection:'column'
   }),[])
@@ -170,7 +176,7 @@ export default function Main() {
           
           <Search isUserSearch={true} />
         </div>
-        { (!userSearchActive) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId}/> }
+        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId}/> }
 
         <div className='group-channel-buttons'>
           <button
@@ -197,6 +203,8 @@ export default function Main() {
         
       </section>
 
+      <ProfileSettingsWindow />
+
       {
         (isGroupActive) && <Create groupType={"GROUP"} setActive={setIsGroupActive}/>
       }
@@ -204,10 +212,7 @@ export default function Main() {
         (isChannelActive) && <Create groupType={"CHANNEL"} setActive={setIsChannelActive}/>
       }
       </>
-      };
+      }
     </div>
-    
-
-    
   );
 }

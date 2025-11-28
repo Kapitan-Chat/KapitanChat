@@ -1051,16 +1051,19 @@ img{
 
 .settings-popover{
   position:absolute;
-  top:calc(100% + 10px);     
-  width:250px; 
+  top: 75px;     
+  width:375px; 
   z-index:10000;
   overflow:visible;
 
 
 
-  display:flex; gap:12px; padding:16px;
+  display:flex; 
+  gap:12px; 
+  padding:20px;
   flex-direction: column;
-  background:rgba(217,217,217,.9);
+  align-items: center;
+  background:rgba(217,217,217, 0.35);
   border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,.25);
 
 
@@ -1472,4 +1475,74 @@ img{
     position: absolute;
     bottom: 40px;
     right: 40px;
+}
+
+.settings-item{
+    width: 100%;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+}
+
+.profile-settings-window{
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    height: 100%;
+    width: 100%;
+
+    background-color: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(5px);
+
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-settings-form{
+    background-color: rgba(217, 217, 217, 0.35);
+    width: 1000px;
+    height: 825px;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 30px;
+}
+
+.profile-settings-form input, .profile-settings-form textarea{
+    outline: none;
+    width: 500px;
+    font-size: 32px;
+    font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: rgba(217, 217, 217, 0.55);
+    color: mintcream;
+}
+
+.profile-settings-form input::placeholder{
+    color: mintcream;
+}
+
+.bio-input{
+    height: 300px;
+    vertical-align: top;
+}
+
+.bio-input::placeholder{
+    color: mintcream;
+}
+
+.profile-settings-profile-picture{
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
 }

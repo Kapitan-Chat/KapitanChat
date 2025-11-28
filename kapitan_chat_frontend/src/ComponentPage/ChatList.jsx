@@ -2,11 +2,10 @@ import { useEffect } from "react";
 import { useAuth } from "../Provider/AuthProvider";
 /**
  * Компонент для отображения списка чатов
- *
+ * 
  * @param {array} chatList - список чатов
  * @param {function} setChatId - функция для обновления идентификатора чата
- * @param {function} setSecondChatId - функция для обновления идентификатора второго чата
- *
+ * 
  * @returns {React.Component} - компонент для отображения списка чатов
  */
     export default function ChatList({
@@ -17,7 +16,9 @@ import { useAuth } from "../Provider/AuthProvider";
         forGroupchat=false,
         setSecondChatId
     }) {
-    const { ChatApi, me, setUserSearchActive, GetChatList, addGroupUsers, setAddGroupUsers } = useAuth();
+    const { ChatApi, me, setUserSearchActive, GetChatList, addGroupUsers, setAddGroupUsers, getImage } = useAuth();
+
+    console.log('ChatList:', chatList);
 
     useEffect(() => {}, [chatList]);
 
@@ -112,7 +113,7 @@ import { useAuth } from "../Provider/AuthProvider";
                         </div>
                         <div className="chat-name">{(isUser) ? ( chat.first_name + ' ' + chat.last_name ) : chat.name}</div>
                     </div>
-                    { (!isNewChat && !isUser && !forGroupchat) && <div className="chat-preview">{chat.lastMessage ? chat.lastMessage : "BRUH"}</div>}
+                    { (!isNewChat && !isUser && !forGroupchat) && <div className="chat-preview">{chat.lastMessage ? chat.lastMessage : "MESSAGE PREVIEW"}</div>}
                 </div>
             ))}
         </div>
@@ -120,5 +121,6 @@ import { useAuth } from "../Provider/AuthProvider";
 
         }
         </>
+        
     );
 }

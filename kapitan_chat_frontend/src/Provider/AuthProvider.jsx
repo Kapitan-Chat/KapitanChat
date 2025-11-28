@@ -285,8 +285,6 @@ export default function AuthContext({ children }) {
     setSettingparams,
     BASEAPI,
     BASE_WS_URL,
-    JWTaccessToken,
-    setToken,
 
     UserApi,
     ChatApi,

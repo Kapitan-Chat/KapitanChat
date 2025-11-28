@@ -91,11 +91,6 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                     <h1>LOAD</h1>
                 ):
                 <>
-                
-                 <div class="chat-header-area" style={{gap:'10px'}}>
-                    
-                <div class="chat-user-info">
-                    {showBackButton && <div class="back-button" onClick={() =>(setBackButtonReaction((perv)=>!perv))}><i class="fas fa-arrow-left"></i></div>}
                  <div className="chat-header-area" style={{gap:'10px'}}>
                 <div className="chat-user-info">
                     <div className="chat-user-avatar">{Avatar()}</div>
@@ -110,7 +105,7 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                     
                     <button className="icon-btn btn btn-danger"><i className="fas fa-ellipsis-v"></i></button>
                 </div>
-            </div>
+                
             </div>
 
             
@@ -131,7 +126,6 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                 })}
                 
                 
-            </div>
             </div>
                 </>}
             

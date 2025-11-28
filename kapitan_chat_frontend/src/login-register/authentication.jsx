@@ -33,6 +33,7 @@ const Authentication = () => {
     };
 
 
+    const animationRef = React.createRef();
     
 
     // Поля для форми Реєстрації
@@ -291,7 +292,7 @@ const Authentication = () => {
             let currentText = "Kapitan$\n\n";
             let index = 0;
 
-            let animation = setInterval(() => {
+            animationRef.current = setInterval(() => {
                 currentText = currentText.slice(0, -1);
                 currentText += text[index++] + '_';
                 
@@ -300,7 +301,7 @@ const Authentication = () => {
                 chatBubbleRef.current.innerText = currentText;
             
                 if(index == text.length){
-                    clearInterval(animation);
+                    clearInterval(animationRef.current);
                     currentText = currentText.slice(0, -1);
                     chatBubbleRef.current.innerText = currentText;
                     bubble_chat_animation = false;
@@ -316,7 +317,12 @@ const Authentication = () => {
             bubble_text_animate("Welcome to Kapitan Chat! Login or register")
         }, 500)
         
-        return ()=>{clearTimeout(st)}
+        return ()=>{
+            clearTimeout(st)
+            if (intervalRef.current) 
+                clearInterval(intervalRef.current);
+
+        }
     }, []);
 
 

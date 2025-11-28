@@ -8,7 +8,7 @@ export default function ThemeSettings() {
   const theme = !!settingparams?.theme;
 
   return (
-    <div className="chat-item m-1" style={{display:'flex',gap:8,alignItems:'center'}}>
+    <div className="settings-item m-1" style={{display:'flex',gap:8,alignItems:'center'}}>
       <div className="theme-img">
         <img src={DAY}  className={theme ? "show" : "hide"} alt="" />
         <img src={NIGHT} className={theme ? "hide" : "show"} alt="" />

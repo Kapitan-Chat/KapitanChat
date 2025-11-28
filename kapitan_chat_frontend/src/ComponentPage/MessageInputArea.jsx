@@ -85,7 +85,8 @@ export default function MessageInputArea({setlist,chatid}) {
             data: {
                 user_id: userid,
                 chat_id: chatid,
-                content: msg
+                content: msg,
+                attachments: []
             }
           })
           setmsg('');

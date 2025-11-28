@@ -17,7 +17,7 @@ function App() {
         <Route path="main" element={<><Main /></>}></Route>
         <Route path="authorization" element={<><Authentication /></>}></Route>
         <Route path="avatar" element={<><AvatarUpload /></>}></Route>
-        <Route path="*" element={<><NotFound/></>} /> 
+        <Route path="*" element={<><NotFound/></>} />
       
       </Routes>
    

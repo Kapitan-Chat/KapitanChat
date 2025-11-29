@@ -113,6 +113,7 @@ export default function MessageInputArea({setlist,chatid}) {
     }
 
     function EmojiHandler(data){
+      console.log(data);
       setmsg(msg + data.native);
     }
     return(

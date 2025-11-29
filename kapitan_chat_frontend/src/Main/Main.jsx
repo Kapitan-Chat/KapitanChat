@@ -69,7 +69,6 @@ export default function Main() {
 
   useEffect(() => {
     console.log('chatId',chatId);
-    setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
     
     setChat(chatList.find((chat) => chat.id === chatId));
@@ -80,7 +79,6 @@ export default function Main() {
 
   useEffect(() => {
     console.log('cntrchatId',cntrchatId);
-    setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
     setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
     console.log('chat',chatList);
@@ -153,8 +151,7 @@ export default function Main() {
           >
             <img src={"https://randomuser.me/api/portraits/men/41.jpg"} alt="profile photo" decoding='async' />
           </button>
-          {/* <button onClick={()=>(setChatId(null))}>chat1</button>
-          <button onClick={()=>(setCntrchatId(null))}>chat2</button> */}
+
           
           <Search isUserSearch={true} />
         </div>
@@ -166,7 +163,12 @@ export default function Main() {
           >Create Group</button>
           <button
             onClick={() => setIsChannelActive(true)}
-          >Create Channel</button>
+          >Create Channel</button>#
+
+          {/* Временные кнопки */}
+          <button onClick={()=>(setChatId(null))}>chat1</button>
+          <button onClick={()=>(setCntrchatId(null))}>chat2</button>
+          
         </div>
       </section>
 

@@ -14,7 +14,6 @@ const Authentication = () => {
     const {
         token,
         setToken,
-        setIsAuthenticated,
 
         login
     } = useAuth();
@@ -229,7 +228,7 @@ const Authentication = () => {
             
             bubble_text_animate("Welcome!");
             happy_animation();
-            setIsAuthenticated(true);
+
             navigate('/main');
         })
         .catch(error => {

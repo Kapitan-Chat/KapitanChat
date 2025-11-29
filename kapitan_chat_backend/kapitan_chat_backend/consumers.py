@@ -26,7 +26,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         def create_message():
             if 'attachment_ids' not in content:
                 content['attachment_ids'] = []
-            s = MessageSerializer(data=content)
+            s = MessageSerializer(data=content, request_user_id=self.scope['user'].id)
             s.is_valid(raise_exception=True)
             s = s.save()
             return s
@@ -54,7 +54,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             self.group_name,
             {
                 'type': 'chat_message_edit',
-                'message': await sync_to_async(lambda: MessageSerializer(msg).data, thread_sensitive=True)(),
+                'message': await sync_to_async(lambda: MessageSerializer(msg, request_user_id=self.scope['user'].id).data, thread_sensitive=True)(),
             }
         )
 
@@ -69,7 +69,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
                 'type': 'chat_message_delete',
                 'message': {
                     'id': content['id'],
-                    'chat': await sync_to_async(lambda: ChatSerializer(chat).data)(),
+                    'chat': await sync_to_async(lambda: ChatSerializer(chat, request_user_id=self.scope['user'].id).data)(),
                 },
             }
         )

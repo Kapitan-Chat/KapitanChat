@@ -5,23 +5,35 @@ import ChatArea from '../ComponentPage/ChatArea';
 import SettingsList from '../ComponentPage/SettingsComp/SettingsList';
 import  {useAuth}  from '../Provider/AuthProvider';
 import { useState,useEffect,useMemo,useRef } from 'react';
-import {useNavigate} from 'react-router-dom';
+import ProfileSettingsWindow from '../ComponentPage/SettingsComp/profileSettingsWindow';
+import Create from './Create';
 
+import { useNavigate } from 'react-router-dom';
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
+
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
 
-  let {chatList,setChatList,isAuthenticated} = useAuth();
+  
+  let { 
+    chatList, 
+    setChatList, 
+    isAuthenticated, 
+    chatId, 
+    setChatId, 
+    userSearchActive 
+  } = useAuth();
+
   const navigate = useNavigate();
   if(!isAuthenticated) navigate("/authorization");
   
   const [showMenu, setShowMenu] = useState(false);
-  const [show, setShow] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
 
-  const [chatId, setChatId] = useState(null);
-  const [cntrchatId, setCntrchatId] = useState(null);
+  const [show, setShow] = useState(false);
   const [chat, setChat] = useState(null);
+
+  const [cntrchatId, setCntrchatId] = useState(null);
   const [secondchat, setSecondChat] = useState(null);
 
   const widthref = useRef(null);
@@ -41,13 +53,29 @@ export default function Main() {
     
   },[])
 
+  const [isGroupActive, setIsGroupActive] = useState();
+  const [isChannelActive, setIsChannelActive] = useState();
+
+  //Хуки для анімацій
+  const [sidebarTopTranslate, setSidebarTopTranslate] = useState('-40px');
+  const [sidebarTopOpacity, setSidebarTopOpacity] = useState(0);
   
+  useEffect(() => {
+    setTimeout(() => {
+      setSidebarTopOpacity(1);
+      setSidebarTopTranslate('0');
+    }, 1250)
+  }, []);
+
   useEffect(() => {
     console.log('chatId',chatId);
     setShowMenu(!showMenu);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
+    
     setChat(chatList.find((chat) => chat.id === chatId));
-    console.log('chat',chatList);
+    
+    console.log('chatList', chatList);
+    console.log('chat',chat);
   }, [chatId]);
 
   useEffect(() => {
@@ -95,6 +123,8 @@ export default function Main() {
       );
     }
   }
+
+
   const chatSectionStyle = useMemo(() => ({
     display:'flex',gap:"10px",flexDirection:'column'
   }),[])
@@ -106,7 +136,13 @@ export default function Main() {
 
       {/* боковое меню с переченью чатов и кнопка настроек и поиск  */}
       <section  className={"chat-list-sidebar" +  (showMenu ? "active" : "") } style={chatSectionStyle} >
-        <div className='sidebar-top'>
+        <div 
+          className='sidebar-top'
+          style={{
+            transform: `translateY(${sidebarTopTranslate})`,
+            opacity: sidebarTopOpacity
+          }}
+        >
           <SettingsList isShow={show} setShow={setShow} >
               
           </SettingsList>
@@ -117,12 +153,21 @@ export default function Main() {
           >
             <img src={"https://randomuser.me/api/portraits/men/41.jpg"} alt="profile photo" decoding='async' />
           </button>
-          <button onClick={()=>(setChatId(null))}>chat1</button>
-          <button onClick={()=>(setCntrchatId(null))}>chat2</button>
+          {/* <button onClick={()=>(setChatId(null))}>chat1</button>
+          <button onClick={()=>(setCntrchatId(null))}>chat2</button> */}
           
-          <Search chatList={chatList} />
+          <Search isUserSearch={true} />
         </div>
-        <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId} />
+        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId}/> }
+
+        <div className='group-channel-buttons'>
+          <button
+            onClick={() => setIsGroupActive(true)}
+          >Create Group</button>
+          <button
+            onClick={() => setIsChannelActive(true)}
+          >Create Channel</button>
+        </div>
       </section>
 
       {!showMenu && <>
@@ -130,14 +175,28 @@ export default function Main() {
       {/* содержимое чата click */}
       <section className='current-chat'>
         
-        {handlerChatOpen()}
+        {
+          (chatId) ? (
+            handlerChatOpen()
+          ) : (
+            <div className="empty-chat" >Please, select or start a chat</div>
+          )
+        }
         
       </section>
       </>}
       
       
-    </div>
-
     
+
+      <ProfileSettingsWindow />
+
+      {
+        (isGroupActive) && <Create groupType={"GROUP"} setActive={setIsGroupActive}/>
+      }
+      {
+        (isChannelActive) && <Create groupType={"CHANNEL"} setActive={setIsChannelActive}/>
+      }
+    </div>
   );
 }

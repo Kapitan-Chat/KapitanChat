@@ -40,7 +40,7 @@ export default function Main() {
   
   useEffect(() => {
     function handleResize() {
-      if (widthref.current.offsetWidth <= 800) {
+      if (widthref.current.offsetWidth <= 768) {
       setShowBackButton(true);
     }
     else{
@@ -70,7 +70,7 @@ export default function Main() {
   useEffect(() => {
     console.log('chatId',chatId);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
-    
+    setShowMenu(false);
     setChat(chatList.find((chat) => chat.id === chatId));
     
     console.log('chatList', chatList);
@@ -79,11 +79,18 @@ export default function Main() {
 
   useEffect(() => {
     console.log('cntrchatId',cntrchatId);
+    setShowMenu(false);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
     setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
     console.log('chat',chatList);
   }, [cntrchatId]);
 
+  useEffect(() => {
+    if(!chatId && cntrchatId){
+      setChatId(cntrchatId);
+      setCntrchatId(null);
+    }
+  }, [chatId,cntrchatId]);
 
   useEffect( () =>{
     console.log("showmenu",showMenu)
@@ -108,6 +115,8 @@ export default function Main() {
     else if(chatId && cntrchatId){
       return(
         <>
+        {widthref.current.offsetWidth <= 768 
+        ? <ChatArea chatId={chatId} chat={chat} showBackButton={showBackButton} setBackButtonReaction={setShowMenu} /> : 
         <PanelGroup direction='horizontal'>
           <Panel defaultSize={30} minSize={35}>
             <ChatArea chatId={chatId} chat={chat}/>
@@ -117,6 +126,7 @@ export default function Main() {
             <ChatArea chatId={cntrchatId} chat={secondchat}/>
           </Panel>
         </PanelGroup>
+        }
         </>
       );
     }
@@ -155,7 +165,7 @@ export default function Main() {
           
           <Search isUserSearch={true} />
         </div>
-        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId}/> }
+        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId} setShowMenu={setShowMenu}  /> }
 
         <div className='group-channel-buttons'>
           <button
@@ -165,11 +175,12 @@ export default function Main() {
             onClick={() => setIsChannelActive(true)}
           >Create Channel</button>#
 
-          {/* Временные кнопки */}
-          <button onClick={()=>(setChatId(null))}>chat1</button>
-          <button onClick={()=>(setCntrchatId(null))}>chat2</button>
+          {/*кнопки выключения чата */}
+          {/* <button onClick={()=>(setChatId(null))}>chat1 is {chatId}</button>
+          <button onClick={()=>(setCntrchatId(null))}>chat2 is {cntrchatId}</button> */}
           
         </div>
+        
       </section>
 
       {!showMenu && <>

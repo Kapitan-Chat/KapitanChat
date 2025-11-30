@@ -1,4 +1,3 @@
-
 import { 
   createContext, useState, useEffect, useContext, useRef
 } from "react";
@@ -109,7 +108,7 @@ export default function AuthContext({ children }) {
     })
 
     return{
-      getList: async () => api.get('').then((res) => res.data),
+      getList: async () => api.get('?reverse=true').then((res) => res.data),
       get: async (id) => api.get(`${id}/`).then((res) => res.data),
       post: async (data) => api.post('', data).then((res) => res.data),
 
@@ -172,11 +171,7 @@ export default function AuthContext({ children }) {
         const finalchat = await Promise.all(
           chat.map(async (item) =>
           {
-            const users = item.users;
-            const anotherUserid = users.find((u) => u != me.id)
-            const anotherUser = await UserApi().get(anotherUserid)
-            console.log('anotherUser',anotherUser)
-            return {...item, active:false,name: anotherUser.username}
+            return {...item, active:false}
           })
         );
         setChatList(finalchat)

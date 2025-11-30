@@ -95,7 +95,7 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                  <div class="chat-header-area" style={{gap:'10px'}}>
                     
                 <div class="chat-user-info">
-                    {showBackButton && <div class="back-button" onClick={() =>(setBackButtonReaction((perv)=>!perv))}><i class="fas fa-arrow-left"></i></div>}
+                    {showBackButton && <div class="back-button" onClick={() =>(setBackButtonReaction(true))}><i class="fas fa-arrow-left"></i></div>}
                     <div className="chat-user-avatar">{Avatar()}</div>
                     <div>
                         <div className="chat-user-name">{chat.name}</div>

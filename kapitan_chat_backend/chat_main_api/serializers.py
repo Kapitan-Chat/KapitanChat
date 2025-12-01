@@ -53,7 +53,8 @@ class ChatSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(MessageSerializerNoChat)
     def get_last_message(self, instance: Chat) -> MessageSerializer:
-        return MessageSerializer(instance.messages.last(), include_chat=False).data
+        msg = instance.messages.last()
+        return MessageSerializer(msg, include_chat=False).data if msg else None
 
     class Meta:
         model = Chat

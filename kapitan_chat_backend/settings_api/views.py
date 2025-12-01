@@ -8,3 +8,5 @@ class UserSettingsViewSet(ModelViewSet):
     queryset = UserSettings.objects.all()
     serializer_class = UserSettingsSerializer
     permission_classes = []
+
+    lookup_field = 'user'

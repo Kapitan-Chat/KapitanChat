@@ -38,7 +38,7 @@ export default function AuthContext({ children }) {
   const [local, setLocal] = useState({});
 
   //theme true is dark false is light
-  const [settingparams, setSettingparams] = useState({user:1,language:"en",theme:false});
+  const [settingparams, setSettingparams] = useState({user:null,language:"en",theme:false});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // const [chatList, setChatList] = useState([
@@ -54,7 +54,6 @@ export default function AuthContext({ children }) {
   const [chatList, setChatList] = useState([]);
   
   
-  const SETTINGSURL = `http://127.0.0.1:8000/api/settings/${userid}/`;
   const BASEAPI ="http://127.0.0.1:8000/api/"
   const BASE_WS_URL = `ws://127.0.0.1:8000/` 
   const BASE_FMS_URL = 'http://localhost:8001/api/file/'
@@ -65,16 +64,19 @@ export default function AuthContext({ children }) {
 
   // Функції
 
-  async function getSettings (url = SETTINGSURL) {
-    const res = await axios.get(url);
-    return res.data;
+  function SettingsApi(URL =`${BASEAPI}settings/`){
+    const api = axios.create({
+      baseURL: URL,
+      headers: {
+        Authorization: `Bearer ${JWTaccessToken}`,
+      }
+    })
+    return{
+    get: async (id) => api.get(`${id}/`).then((res) => res.data),
+    put: async (id, data) => api.put(`${id}/`, data).then((res) => res.data),
+    post: async (data) => api.post('', data).then((res) => res.data),
   }
-
-  async function putSettings (url = SETTINGSURL) {
-    const res = await axios.put(url, settingparams);
-    console.log(res.data);
-    return res.data;
-  }
+}
 
   function UserApi(URL =`${BASEAPI}users/`){
     const api = axios.create({
@@ -160,12 +162,27 @@ export default function AuthContext({ children }) {
 
   async function GetChatList() {
     console.log('GetChatList');
-    const me = await UserApi().getMe();
-        setMe(me);
-        setUserid(me.id);
-        console.log('me',me);
+    const mee = await UserApi().getMe();
+    console.log('mee',mee);
+        setMe(mee);
+        setUserid(mee.id);
+        console.log('me',mee);
         
-        
+        SettingsApi().get(mee.id).then((res) => {
+          console.log('Settings fetched successfully:', res);
+          setSettingparams({user:mee.id, theme:res.theme, language:res.language});
+          console.log('res.language_choices',res.language_choices);
+          setLangChoiceList([...res.language_choices]);
+        })
+        .catch((error) => {
+          SettingsApi().post({user:mee.id, theme:false, language:'en-US'}).then((res) => {
+             setSettingparams({user:mee.id, theme:res.theme, language:res.language});
+            setLangChoiceList(...res.language_choices);
+          })
+          .catch((error) => {
+            console.error('Error creating settings:', error);
+          });
+        });
         const chat = await ChatApi().getList();
 
         const finalchat = await Promise.all(
@@ -179,16 +196,13 @@ export default function AuthContext({ children }) {
         console.log('finalchat',finalchat);
   }
 
+  useEffect(() => {
+    console.log('langChoiceList',langChoiceList);
+  },[langChoiceList])
 
   //первоначальная загрузка
   useEffect(() => {
-    console.log('AuthProvider useEffect START');
     try {
-      getSettings().then((res) => {
-        setLangChoiceList(res.language_choices);
-        setLocal(res.locale);
-        setSettingparams({user:res.user,language:res.language,theme:res.theme});
-      });
       (async()=>
       {
         let access  = localStorage.getItem('access');
@@ -237,6 +251,8 @@ export default function AuthContext({ children }) {
   useEffect(() => {
     (async () => {
       GetChatList();
+
+    
     })();
     
   },[JWTaccessToken]);
@@ -244,8 +260,9 @@ export default function AuthContext({ children }) {
 
   const first = useRef(true);
   useEffect(() => {
+    setLocal(settingparams.local);
     if (first.current) { first.current = false; return; }
-    putSettings();
+    SettingsApi().put(settingparams.id, settingparams);
   }, [settingparams]);
 
   useEffect(() => {
@@ -260,6 +277,15 @@ export default function AuthContext({ children }) {
   const login = () => {
     localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
+    (async () => {
+      mee = await UserApi().getMe();
+      let settingParams = {
+        user: mee.id,
+        language: 'en-US',
+        theme: false
+      }
+      setSettingparams(postSettings(settingParams));
+    })
    
   };
 
@@ -346,7 +372,9 @@ export default function AuthContext({ children }) {
     getImage,
 
     profileSettingsShow,
-    setProfileSettingsShow
+    setProfileSettingsShow,
+
+    login,
   }
 
   // Кінець готування об'єкту

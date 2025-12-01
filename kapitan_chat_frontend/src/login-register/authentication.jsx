@@ -15,7 +15,10 @@ const Authentication = () => {
         token,
         setToken,
 
-        login
+        login,
+        local,
+        settingparams,
+        setSettingparams,
     } = useAuth();
 
     const navigate = useNavigate();

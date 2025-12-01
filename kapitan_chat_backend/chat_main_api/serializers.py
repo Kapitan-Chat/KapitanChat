@@ -1,15 +1,25 @@
+from __future__ import annotations
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from django.contrib.auth.models import User
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import empty
 
 from users_api.serializers import UserSerializer
 from .models import Message, Chat, Attachment, ChatType
 
+# hack to show message model in last_message
+class MessageSerializerNoChat(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        exclude = ('chat',)
 
 class ChatSerializer(serializers.ModelSerializer):
+    last_message: Message = serializers.SerializerMethodField(read_only=True)
+
     def __init__(self, instance=None, data=empty, **kwargs):
         self.request_user_id = kwargs.pop('request_user_id', None)
         super().__init__(instance, data, **kwargs)
@@ -33,15 +43,17 @@ class ChatSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance: Chat):
-        print(self.request_user_id)
         if self.request_user_id and instance.type == ChatType.DIRECT:
             for u in instance.users.all():
                 if u.id != self.request_user_id:
                     instance.name = u.first_name + (" " + u.last_name if u.last_name else "")
                     instance.description = u.profile.bio
         res = super().to_representation(instance)
-        print(res)
         return res
+
+    @extend_schema_field(MessageSerializerNoChat)
+    def get_last_message(self, instance: Chat) -> MessageSerializer:
+        return MessageSerializer(instance.messages.last(), include_chat=False).data
 
     class Meta:
         model = Chat
@@ -59,10 +71,11 @@ class MessageSerializer(serializers.ModelSerializer):
     user_id: int = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, source='user')
     attachments: list[Attachment] = AttachmentSerializer(many=True, allow_null=True)
     chat_id: int = serializers.PrimaryKeyRelatedField(write_only=True, required=True, queryset=Chat.objects.all(), source='chat')
-    chat: Chat = ChatSerializer(read_only=True)
+    chat: Chat = serializers.SerializerMethodField(read_only=True)
 
-    def __init__(self, instance=None, data=empty, **kwargs):
+    def __init__(self, instance=None, data=empty, include_chat=True, **kwargs):
         self.request_user_id = kwargs.pop('request_user_id', None)
+        self.include_chat = include_chat
         super().__init__(instance, data, **kwargs)
 
     def validate(self, attributes: dict[str, Any]) -> dict[str, Any]:
@@ -83,10 +96,10 @@ class MessageSerializer(serializers.ModelSerializer):
 
         return message
 
-    def to_representation(self, instance: Message):
-        serialized = super().to_representation(instance)
-        serialized['chat'] = ChatSerializer(instance.chat, read_only=True, request_user_id=self.request_user_id).data
-        return serialized
+    @extend_schema_field(ChatSerializer)
+    def get_chat(self, instance: Message):
+        if not self.include_chat: return None
+        return ChatSerializer(instance.chat, read_only=True, request_user_id=self.request_user_id).data
 
     class Meta:
         model = Message

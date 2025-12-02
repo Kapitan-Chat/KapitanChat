@@ -703,6 +703,7 @@ body {
     padding: 0;
     background: transparent;
 }
+/*лист */
 
 .chat-item {
     display: flex;

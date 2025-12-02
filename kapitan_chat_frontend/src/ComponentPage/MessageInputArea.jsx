@@ -9,6 +9,8 @@ import { useAuth } from "../Provider/AuthProvider"
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
+import emptyFile from '../assets/empty-file.webp'
+
 /**
  * Компонент для ввода сообщения
  * 
@@ -18,11 +20,18 @@ import Picker from "@emoji-mart/react";
  * @returns {React.Component} - компонент для ввода сообщения
  */
 export default function MessageInputArea({setlist,chatid}) {
-    const {JWTaccessToken,BASE_WS_URL,userid} = useAuth();
+    const {JWTaccessToken,BASE_WS_URL,userid,uploadAttachments} = useAuth();
     const [msg, setmsg] = useState("");
     const wsRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     const [showEmoji, setShowEmoji] = useState(false);
+
+    const [selectedFiles, setSelectedFiles] = useState([]);
+
+    useEffect(() => {
+      console.log('All selected files:', selectedFiles);
+    }, [selectedFiles]);
     /** соединение с вебсокетом */
     useEffect(() => {
     const ws = new WebSocket(`${BASE_WS_URL}ws/chat?token=${JWTaccessToken}`);
@@ -85,25 +94,28 @@ export default function MessageInputArea({setlist,chatid}) {
  * 
  * @throws {Error} - если возникла ошибка при отправке сообщения
  */
-    function MessageHandler(e){
+    async function MessageHandler(e){
         e.preventDefault();
-        try{
-          send({
-            type: 'message',
-            data: {
-                user_id: userid,
-                chat_id: chatid,
-                content: msg,
-                attachments: []
-            }
-          })
-          setShowEmoji(false);
-          setmsg('');
+        if(msg.length > 0 || selectedFiles.length > 0){
+          const response = await uploadAttachments(selectedFiles);
+          try{
+            send({
+              type: 'message',
+              data: {
+                  user_id: userid,
+                  chat_id: chatid,
+                  content: msg,
+                  attachments: response
+              }
+            })
+            setShowEmoji(false);
+            setmsg('');
+            setSelectedFiles([]);
+          }
+          catch(e){
+              console.log(e);
+          }
         }
-        catch(e){
-            console.log(e);
-        }
-        
     }
 
     function handleKeyDown(e) {
@@ -116,41 +128,115 @@ export default function MessageInputArea({setlist,chatid}) {
       console.log(data);
       setmsg(msg + data.native);
     }
+
+    function isFileInArray(file, filesArray) {
+      return filesArray.some(
+        (f) =>
+          f.name === file.name &&
+          f.size === file.size &&
+          f.lastModified === file.lastModified
+      );
+    }
+
+    async function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      console.log("Selected:", file);
+      if(!isFileInArray(file, selectedFiles))
+        setSelectedFiles([...selectedFiles, file]);
+    }
+
     return(
         <>
         <div>
             <h1 id="status"></h1>
         </div>
         <div className="message-input-container">
-                <div className="message-input-wrapper">
-                   
-                    <button className="icon-btn"><i className="fas fa-paperclip"></i></button>
-                    <label htmlFor="msg"></label>
-                    <input type="text" className="message-input" name="message" id="msg" placeholder="Write message..." 
-                    value={msg} onChange={(e) => setmsg(e.target.value)} onKeyDown={(e) => handleKeyDown(e)}/>
-                    <div className="input-actions">
-                       
-                      <div className="emoji-wrapper">
-        {showEmoji && (
-          <div className="emoji-picker">
-            <Picker
-              data={data}
-              onEmojiSelect={(emoji) => EmojiHandler(emoji)}
+          {
+            (selectedFiles.length > 0) && <div className="attachments-container">
+              {
+                selectedFiles.map((file) => {
+                  return <div className="selected-file" style={{backgroundImage: `url(${emptyFile})`}}>
+                    {file.name.substring(file.name.lastIndexOf(".") + 1)}
+                    <button 
+                      className="delete-attachment"
+                      onClick={() => {
+                        setSelectedFiles(
+                          selectedFiles.filter(
+                            (deleteFile) => (
+                              (deleteFile.name != file.name) && 
+                              (deleteFile.size != file.size) && 
+                              (deleteFile.lastModified != file.lastModified)
+                            )
+                          )
+                        )
+                      }}
+                    >❌</button>
+                  </div>
+                })
+              }
+            </div>
+          }
+          <div className="message-input-wrapper">
+              
+            <button 
+              className="icon-btn"
+              onClick={() => {
+                console.log("btn click", fileInputRef.current)
+                fileInputRef.current.click();
+              }}
+            ><i className="fas fa-paperclip"></i></button>
+            <label htmlFor="msg"></label>
+            <input 
+              type="text" 
+              className="message-input" 
+              name="message" 
+              id="msg" 
+              placeholder="Write message..." 
+              value={msg} 
+              onChange={(e) => setmsg(e.target.value)} 
+              onKeyDown={(e) => handleKeyDown(e)}
             />
-          </div>
-        )}
-
-        <button
-          className="icon-btn"
-          onClick={() => setShowEmoji((v) => !v)}
-        >
-          <i className="far fa-smile"></i>
-        </button>
-      </div>
-
-                        <button className="send-button" onClick={(e) => (MessageHandler(e))}><i className="fas fa-paper-plane"></i></button>
+            <div className="input-actions">
+                  
+                <div className="emoji-wrapper">
+                  {showEmoji && (
+                    <div className="emoji-picker">
+                      <Picker
+                        data={data}
+                        onEmojiSelect={(emoji) => EmojiHandler(emoji)}
+                      />
                     </div>
+                  )}
+
+                  <button
+                    className="icon-btn"
+                  >
+                  <i 
+                    className="far fa-smile"
+                    onClick={() => {         
+                      setShowEmoji((v) => !v);
+                    }}
+                  ></i>
+                  </button>
+
+                  <input 
+                    style={{ display: "none" }} 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                  />
                 </div>
+
+                <button 
+                  className="send-button" 
+                  onClick={(e) => (MessageHandler(e))}
+                >
+                  <i className="fas fa-paper-plane"></i>
+                </button>
+              </div>
+          </div>
             </div>
 
         </>

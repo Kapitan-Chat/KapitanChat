@@ -20,7 +20,10 @@ export default function Main() {
     setChatList, 
     isAuthenticated, 
     chatId, 
-    setChatId, 
+    setChatId,
+    secondchatId, 
+    setSecondChatId,
+    
     userSearchActive 
   } = useAuth();
 
@@ -33,7 +36,6 @@ export default function Main() {
   const [show, setShow] = useState(false);
   const [chat, setChat] = useState(null);
 
-  const [cntrchatId, setCntrchatId] = useState(null);
   const [secondchat, setSecondChat] = useState(null);
 
   const widthref = useRef(null);
@@ -78,19 +80,19 @@ export default function Main() {
   }, [chatId]);
 
   useEffect(() => {
-    console.log('cntrchatId',cntrchatId);
+    console.log('cntrchatId',secondchatId);
     setShowMenu(false);
-    setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
-    setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
+    setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === secondchatId })));
+    setSecondChat(chatList.find((chat) => chat.id === secondchatId));
     console.log('chat',chatList);
-  }, [cntrchatId]);
+  }, [secondchatId]);
 
   useEffect(() => {
-    if(!chatId && cntrchatId){
-      setChatId(cntrchatId);
-      setCntrchatId(null);
+    if(!chatId && secondchatId){
+      setChatId(secondchatId);
+      setSecondChatId(null);
     }
-  }, [chatId,cntrchatId]);
+  }, [chatId,secondchatId]);
 
   useEffect( () =>{
     console.log("showmenu",showMenu)
@@ -99,12 +101,12 @@ export default function Main() {
 
 
   function handlerChatOpen(){
-    if(!chatId && !cntrchatId){
+    if(!chatId && !secondchatId){
       return ;
     }
-    else if(!chatId || !cntrchatId){
+    else if(!chatId || !secondchatId){
 
-      const cId = chatId ? chatId : cntrchatId;
+      const cId = chatId ? chatId : secondchatId;
       const c = chatId ? chat : secondchat;
       return(
         <>
@@ -123,7 +125,7 @@ export default function Main() {
           </Panel>
           <PanelResizeHandle   className="resize-handle"/>
           <Panel defaultSize={30} minSize={35}>
-            <ChatArea chatId={cntrchatId} chat={secondchat}/>
+            <ChatArea chatId={secondchatId} chat={secondchat}/>
           </Panel>
         </PanelGroup>
         }
@@ -165,7 +167,7 @@ export default function Main() {
           
           <Search isUserSearch={true} />
         </div>
-        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId} setShowMenu={setShowMenu}  /> }
+        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setSecondChatId} setShowMenu={setShowMenu}  /> }
 
         <div className='group-channel-buttons'>
           <button

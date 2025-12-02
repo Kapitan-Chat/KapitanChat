@@ -523,10 +523,82 @@ body {
     background-color: #c3c3c3e2;
 }
 
+.editbutton{
+    background-color: rgba(217, 217, 217, 0.35);
+    width: 70px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+
+    color: mintcream;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+
+    
+}
+
+.editbutton:hover{
+    background-color: rgba(217, 217, 217, 0.5);
+}
+
+.deletebutton{
+    background-color: rgba(79, 5, 5, 0.35);
+    width: 70px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+
+    color: mintcream;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+}
+
+.deletebutton:hover{
+    color: red;
+}
+
 :root[data-bs-theme="dark"] {
         * {
     box-sizing: border-box;
 }
+
+.editbutton{
+    background-color: rgba(217, 217, 217, 0.35);
+    width: 70px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+
+    color: mintcream;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+
+    
+}
+
+.editbutton:hover{
+    background-color: rgba(217, 217, 217, 0.5);
+}
+
+.deletebutton{
+    background-color: rgba(132, 96, 96, 0.35);
+    width: 70px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    color: mintcream;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: bold;
+}
+
+.deletebutton:hover{
+    color: red;
+}
+
 
 body {
     background: #001b92;

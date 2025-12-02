@@ -1,4 +1,5 @@
 import MessageInputArea from "./MessageInputArea";
+import MessageMenu from "./MessageMenu";
 import { useAuth } from "../Provider/AuthProvider";
 import { useEffect, useState } from "react";
 import Search from "./Search";
@@ -22,6 +23,9 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
     const [loading, setLoading] = useState(true);
     const [isSerch, setIsSerch] = useState(false);
 
+
+    const [showMessageMenu, setShowMessageMenu] = useState(false);
+    const [messageMenuId, setMessageMenuId] = useState(null);
     useEffect(() => {
         if(!chat){
             setLoading(true)
@@ -117,13 +121,24 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                 {messagelist.map((item)=>{
 
                     return(
-                        <div key={item.id} className={'message'+(item.user.id === me.id ? " sent" : " received")}>
+                         
+                        <div key={item.id} className={'message'+(item.user.id === me.id ? " sent" : " received")}
+                        style={{position:'relative'}}
+                        onContextMenu={(e) =>{e.preventDefault();if(e.button == 2) {setShowMessageMenu(true); setMessageMenuId(item.id)}}}
+                        >
+                            {item.user.id === me.id && messageMenuId === item.id
+                            &&
+                            <MessageMenu  message={item} showMenu={showMessageMenu} setShowMenu={setShowMessageMenu} OnDelete={()=>{setMessagelist(messagelist.filter((item) => item.id !== messageMenuId))}} />
+                            }
                             <div className="message-avatar">{UserAvatar(item.user)}</div>
                             <div className="message-content">
                                 <div className="message-text">{item.content}</div>
-                                <div className="message-time">{item.created_at.slice(11,19)}</div>
-                                </div>
+                                <div className="message-time">{item.created_at.slice(11,16)} <span style={{color:'red'}}>{item.is_edited ? "ed":""}</span></div>
+                                
+                            </div>
+                            
                         </div>
+                        
                     )
 
                 })}

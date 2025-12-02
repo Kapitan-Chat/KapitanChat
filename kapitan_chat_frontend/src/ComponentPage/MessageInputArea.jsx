@@ -2,10 +2,6 @@
 import { useState,useRef,useEffect } from "react"
 import { useAuth } from "../Provider/AuthProvider"
 
-
-
-// вресенно 
-
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
@@ -17,51 +13,11 @@ import Picker from "@emoji-mart/react";
  * 
  * @returns {React.Component} - компонент для ввода сообщения
  */
-export default function MessageInputArea({setlist,chatid}) {
-    const {JWTaccessToken,BASE_WS_URL,userid} = useAuth();
-    const [msg, setmsg] = useState("");
-    const wsRef = useRef(null);
-
-    const [showEmoji, setShowEmoji] = useState(false);
-    /** соединение с вебсокетом */
-    useEffect(() => {
-    const ws = new WebSocket(`${BASE_WS_URL}ws/chat?token=${JWTaccessToken}`);
-    wsRef.current = ws;
-
-    ws.addEventListener("open", () => {
-      console.log("WS open");
-      if (!userid) console.warn("user not found");
-    });
-
-    ws.addEventListener("message", (ev) => {
-
-        
-      try {
-        const payload = JSON.parse(ev.data);
-        if (payload.type === "message") {
-            console.log("WS message", payload.data);
-            if(payload.data.chat.id===chatid){
-              setlist((list) => [...list, payload.data]);
-            }
-            else{
-              alert("у вас сообщение в чате " + payload.data.chat.id);
-            }
-        }
-      } catch (e) {
-        console.warn("bad WS message", e);
-      }
-    });
-
-
-    ws.addEventListener("error", (e) => {
-      console.error("WS error", e);
-      const h1 = document.getElementById("status");
-      if (h1) h1.textContent = "Error WS";
-    });
-
-    ws.addEventListener("close", () => console.log("WS close"));
-    return () => ws.close();
-  }, [BASE_WS_URL, JWTaccessToken]); 
+export default function MessageInputArea({setlist,chatid,}) {
+  const {userid,wsRef,wsError,isEdit,setIsEdit,editMessage,setEditMessage,MessageApi} = useAuth();
+  const [msg, setmsg] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+    
 
   // отправка сообщения
   const send = (obj) => {
@@ -74,7 +30,37 @@ export default function MessageInputArea({setlist,chatid}) {
     console.log("send", obj);
   };
 
+  wsRef.current.onmessage = (event) => {
+    const payload = JSON.parse(event.data);
+    console.log("onmessage", payload);
+    
+    if(payload.type === "message" && payload.data.chat.id === chatid){
+      console.log("onmessage", payload.data);
+    setlist((list) => [...list, payload.data]);
+    }
+    else if(payload.type == "message_edit" && payload.data.chat.id == chatid){
+      console.log("onmessage edit data", payload.data);
+    setlist((list) => {
+      const updatedList = list.map((item) => {
+        if (item.id === payload.data.id) {
+          return { ...item, content: payload.data.content,is_edited: true };
+        }
+        return item;
+      });
+      return updatedList;
+    });
+    }
+  }
+ 
 
+  useEffect(() => {
+    if(isEdit){
+      setmsg(editMessage.content);
+    }
+
+  },[isEdit,editMessage]);
+
+  
 
 /**
  * Обработчик события отправки сообщения
@@ -86,6 +72,7 @@ export default function MessageInputArea({setlist,chatid}) {
  * @throws {Error} - если возникла ошибка при отправке сообщения
  */
     function MessageHandler(e){
+      if(!isEdit){
         e.preventDefault();
         try{
           send({
@@ -103,6 +90,29 @@ export default function MessageInputArea({setlist,chatid}) {
         catch(e){
             console.log(e);
         }
+      }
+      else if(isEdit){
+        e.preventDefault();
+        try{
+          send({
+            type: 'message_edit',
+            data: {
+                id: editMessage.id,
+                userid: userid,
+                chatid: chatid,
+                content: msg,
+                attachments: []
+            }
+          })
+          setShowEmoji(false);
+          setmsg('');
+          setIsEdit(false);
+          setEditMessage({});
+        }
+        catch(e){
+            console.log(e);
+        }
+      }
         
     }
 
@@ -116,6 +126,16 @@ export default function MessageInputArea({setlist,chatid}) {
       console.log(data);
       setmsg(msg + data.native);
     }
+
+    // очистка полей
+    useEffect(() => {
+    return () => {
+      setmsg('');
+      setShowEmoji(false);
+      setIsEdit(false);
+      setEditMessage({});
+    }
+  },[chatid])
     return(
         <>
         <div>

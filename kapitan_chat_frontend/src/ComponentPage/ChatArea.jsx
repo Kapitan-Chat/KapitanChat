@@ -87,9 +87,9 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
 
     return (
         
-        <div className="current-chat-wrapper">
+        <div>
             <div className="sidebar-overlay" id="sidebarOverlay"></div>
-            <div className="chat-area">
+            <div class="chat-area">
 
                 {loading ? (
                     <h1>LOAD</h1>
@@ -106,17 +106,17 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                         {/* <div class="chat-user-status">online</div> */}
                     </div>
                 </div>
-                {isSerch && <Search chatlist={GetListForSearch()}/>}
-                <div className="chat-actions">
-                    <button onClick={()=>setIsSerch(!isSerch)} className="icon-btn"> {isSerch ? <i className="fa-solid fa-xmark"></i>:<i className="fas fa-search"></i>} </button>
+                {isSerch && <Search chatList={GetListForSearch()}/>}
+                <div class="chat-actions">
+                    <button onClick={()=>setIsSerch(!isSerch)} class="icon-btn"> {isSerch ? <i class="fa-solid fa-xmark"></i>:<i class="fas fa-search"></i>} </button>
                     
-                    <button className="icon-btn btn btn-danger"><i className="fas fa-ellipsis-v"></i></button>
+                    <button class="icon-btn btn btn-danger"><i class="fas fa-ellipsis-v"></i></button>
                 </div>
                 
             </div>
 
             
-            <div className="messages-container">
+            <div class="messages-container">
                 
                 {messagelist.map((item)=>{
 

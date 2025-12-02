@@ -99,12 +99,10 @@ export default function AuthContext({ children }) {
       get: async (id) => api.get(`${id}`).then((res) => res.data),
       getMe: async () => api.get('me/').then((res) => res.data),
       register: async (data) => api.post('register/', data).then((res) => res.data),
-      profilePUT: async (data) => api.put(`profile/${me.id}`, data).then((res) => res.data),
-      profilePATCH: async (data) => api.patch(`profile/${me.id}`, data).then((res) => res.data),
       token: async ({username, password}) => (await api.post('token/', {username, password})).data,
       tokenRefresh: async () => api.post('token/refresh/', {refresh: JWTrefreshToken}).then((res) => res.data),
       tokenVerify: async () => api.post('token/verify/', {token: JWTaccessToken}).then((res) => res.data),
-      search: async (name) => api.get(`search/?query=${encodeURIComponent(name)}`).then((res) => res.data)
+
     }
   }
 
@@ -142,29 +140,6 @@ export default function AuthContext({ children }) {
       get: async (id) => api.get(`${id}/`).then((res) => res.data),
       // put: async (id, data) => api.put(`${id}/`, data).then((res) => res.data),
       // delete: async (id) => api.delete(`${id}/`).then((res) => res.data),
-    }
-  }
-
-  function FileApi(URL =`api/file`){
-    const api = axios.create({
-      baseURL: BASE_FMS_URL,
-      headers: {
-        Authorization: `Bearer ${JWTaccessToken}`,
-      }
-
-    })
-
-    return{
-      post: async (formData) =>
-        api.post('', formData, {
-          headers: {
-              "Content-Type": "multipart/form-data"
-          }
-      }).then((res) => res.data),
-
-      get: async (params) => api.get(`/?id=${params.id}`, {
-        responseType: 'blob'
-      }).then((res) => res.data),
     }
   }
 
@@ -223,25 +198,35 @@ export default function AuthContext({ children }) {
         ){
           console.log("JWT Token inalid or abscent!");
           // Перенаправлення на авторизацію
-          // navigate('/authorization');
+          navigate('/authorization');
+          setIsAuthenticated(false);
 
-          // временно 
-          const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
+          // // временно 
+          // const t = await UserApi().token({ username: "maskerrr", password: "Admin_123" });
 
-          access = t.access; refresh = t.refresh;
-          localStorage.setItem("access", access);
-          localStorage.setItem("refresh", refresh);
-          setToken({JWTaccessToken: access,JWTrefreshToken: refresh,});
+          // access = t.access; refresh = t.refresh;
+          // localStorage.setItem("access", access);
+          // localStorage.setItem("refresh", refresh);
+          // setToken({JWTaccessToken: access,JWTrefreshToken: refresh,});
         }
         else{
           try{
             await  UserApi().tokenVerify()
           }
+          // проверка на действительность токена, если нет то выдает 401 и срабатывает catch
           catch{
-            const newtoken = await UserApi().tokenRefresh();
+            try{
+              const newtoken = await UserApi().tokenRefresh();
             
-            setToken({JWTrefreshToken,JWTaccessToken:newtoken});
-            localStorage.setItem("access", newtoken.access);
+              setToken({JWTrefreshToken,JWTaccessToken:newtoken});
+              localStorage.setItem("access", newtoken.access);
+            }
+            // проверка на действительность токена, если нет то выдает 401 и срабатывает catch
+            catch{
+              isAuthenticated(false);
+              navigate('/authorization');
+            }
+            
           }
           await GetChatList();
         }
@@ -339,28 +324,6 @@ export default function AuthContext({ children }) {
     setIsAuthenticated(false);
   };
 
-  async function getImageHash(file) {
-    const buffer = await file.arrayBuffer();
-    const hash = await crypto.subtle.digest("SHA-256", buffer);
-
-    return Array.from(new Uint8Array(hash))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-
-  async function getImage(image_id) {
-    try {
-        const blob = await FileApi().get({ id: image_id });
-
-        console.log("Blob:", blob);
-
-        const url = URL.createObjectURL(blob);
-        return(url);
-    } catch (error) {
-        console.error("Image fetch error:", error);
-    }
-  }
-
   // Закінчення функцій
 
 
@@ -405,7 +368,6 @@ export default function AuthContext({ children }) {
     UserApi,
     ChatApi,
     MessageApi,
-    FileApi,
 
     JWTaccessToken,
     JWTrefreshToken,

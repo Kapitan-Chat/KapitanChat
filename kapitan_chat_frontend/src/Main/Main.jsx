@@ -8,9 +8,7 @@ import { useState,useEffect,useMemo,useRef } from 'react';
 import ProfileSettingsWindow from '../ComponentPage/SettingsComp/profileSettingsWindow';
 import Create from './Create';
 
-import { useNavigate } from 'react-router-dom';
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
-
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
 
@@ -62,21 +60,13 @@ export default function Main() {
   const [sidebarTopTranslate, setSidebarTopTranslate] = useState('-40px');
   const [sidebarTopOpacity, setSidebarTopOpacity] = useState(0);
   
-  useEffect(() => {
-    setTimeout(() => {
-      setSidebarTopOpacity(1);
-      setSidebarTopTranslate('0');
-    }, 1250)
-  }, []);
-
+  
   useEffect(() => {
     console.log('chatId',chatId);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
     setShowMenu(false);
     setChat(chatList.find((chat) => chat.id === chatId));
-    
-    console.log('chatList', chatList);
-    console.log('chat',chat);
+    console.log('chat',chatList);
   }, [chatId]);
 
   useEffect(() => {
@@ -133,8 +123,6 @@ export default function Main() {
       );
     }
   }
-
-
   const chatSectionStyle = useMemo(() => ({
     display:'flex',gap:"10px",flexDirection:'column'
   }),[])
@@ -190,13 +178,7 @@ export default function Main() {
       {/* содержимое чата click */}
       <section className='current-chat'>
         
-        {
-          (chatId) ? (
-            handlerChatOpen()
-          ) : (
-            <div className="empty-chat" >Please, select or start a chat</div>
-          )
-        }
+        {handlerChatOpen()}
         
       </section>
       </>}
@@ -213,5 +195,7 @@ export default function Main() {
         (isChannelActive) && <Create groupType={"CHANNEL"} setActive={setIsChannelActive}/>
       }
     </div>
+
+    
   );
 }

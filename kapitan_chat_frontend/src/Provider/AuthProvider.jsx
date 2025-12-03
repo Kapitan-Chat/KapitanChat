@@ -126,6 +126,24 @@ export default function AuthContext({ children }) {
     }
   }
 
+  function AttachmentApi(URL =`${BASEAPI}chat/attachment`){
+    const api = axios.create({
+      baseURL: URL,
+      headers: {
+        Authorization: `Bearer ${JWTaccessToken}`,
+      }
+
+    })
+
+    return{
+      get: async (id) => api.get(`id=${id}/`).then((res) => res.data),
+      post: async (data) => api.post(`/`, data).then((res) => res.data),
+      put: async (data) => api.put(`id=${id}/`, data).then((res) => res.data),
+      patch: async (data) => api.patch(`id=${id}`, data).then((res) => res.data),
+      delete: async (id) => api.delete(`id=${id}` ).then((res) => res.data),
+    }
+  }
+
   function MessageApi(URL =`${BASEAPI}chat/message/`){
     const api = axios.create({
       baseURL: URL,
@@ -177,6 +195,22 @@ export default function AuthContext({ children }) {
         setChatList(finalchat)
 
         console.log('finalchat',finalchat);
+
+        chat.forEach(async (item) => {
+          if (item.type === "DIRECT") {
+            const otherUser = item.users.find((u) => u.id !== mee.id);
+            if (!otherUser) return;
+
+            const img = await getProfileImage(item.users[otherUser]);
+
+            setChatList((prev) =>
+              prev.map((chat) =>
+                chat.id === item.id ? { ...chat, img: img } : chat
+              )
+            );
+          }
+        });
+        console.log('finalchat with profile images:',finalchat);
   }
 
   useEffect(() => {
@@ -324,6 +358,102 @@ export default function AuthContext({ children }) {
     setIsAuthenticated(false);
   };
 
+  async function getImageHash(file) {
+    const buffer = await file.arrayBuffer();
+    const hash = await crypto.subtle.digest("SHA-256", buffer);
+
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  async function getImage(image_id) {
+    try {
+        const blob = await FileApi().get({ id: image_id });
+
+        console.log("Blob:", blob);
+
+        const url = URL.createObjectURL(blob);
+        return(url);
+    } catch (error) {
+        console.error("Image fetch error:", error);
+    }
+  }
+
+  async function getProfileImage(id){
+    try{
+      console.log('Getting profile image of user', id);
+      const user = await UserApi().get(id);
+      console.log('User found!', user);
+
+      const imageUrl = await getImage(user.profile.profile_picture_id);
+
+      return imageUrl;
+    } catch (err) {
+      console.log('Getting profile image error:', err.message);
+    }
+    
+  }
+
+  async function uploadAttachments(selectedFiles){
+    try{
+      let attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+        const hash = await getImageHash(file);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("hash", hash);
+
+        const uploadedFile = await FileApi().post(formData);
+
+        const attachmentData = {
+          name: file.name,
+          storage_id: uploadedFile.id,
+          type: file.type
+        }
+
+        const uploadedAttachment = await AttachmentApi().post(attachmentData);
+
+        return uploadedAttachment;
+
+        })
+      )
+
+      return attachments;
+    } catch (err) {
+      console.log('Error while trying to upload selected files:', err);
+    }
+    
+  }
+
+  async function getAttachmentsSrc(messageList) {
+  try {
+    const newMessageList = await Promise.all(
+      messageList.map(async (message) => {
+
+        if (!message.attachments || message.attachments.length === 0) {
+          return message;
+        }
+
+        const newAttachments = await Promise.all(
+          message.attachments.map(async (attachment) => {
+            const src = await getImage(attachment.storage_id);
+            return { ...attachment, src };
+          })
+        );
+
+        return { ...message, attachments: newAttachments };
+      })
+    );
+
+    return newMessageList;
+
+  } catch (err) {
+    console.log('Error while getting srcs of attachments:', err);
+  }
+}
+
   // Закінчення функцій
 
 
@@ -368,6 +498,8 @@ export default function AuthContext({ children }) {
     UserApi,
     ChatApi,
     MessageApi,
+    FileApi,
+    AttachmentApi,
 
     JWTaccessToken,
     JWTrefreshToken,
@@ -384,6 +516,10 @@ export default function AuthContext({ children }) {
 
     getImageHash,
     getImage,
+    getProfileImage,
+
+    uploadAttachments,
+    getAttachmentsSrc,
 
     profileSettingsShow,
     setProfileSettingsShow,

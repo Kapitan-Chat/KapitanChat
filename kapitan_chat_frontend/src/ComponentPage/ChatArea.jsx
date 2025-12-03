@@ -19,7 +19,7 @@ import Search from "./Search";
 export default function ChatArea({chatId,chat,showBackButton,setBackButtonReaction}) {
 
     const [messagelist, setMessagelist] = useState([]);
-    const{me,MessageApi} = useAuth();
+    const{me,MessageApi,getAttachmentsSrc} = useAuth();
     const [loading, setLoading] = useState(true);
     const [isSerch, setIsSerch] = useState(false);
 
@@ -40,6 +40,14 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
     useEffect(() => {
         setMessagelist([]);
         MessageApi().getList(chatId).then((res) => setMessagelist(res));
+
+        async function loadMessages() {
+            const res = await MessageApi().getList(chatId);
+            const newMessages = await getAttachmentsSrc(res);
+            setMessagelist(newMessages);
+            console.log('New messages:', newMessages);
+        }
+        loadMessages();
     },[chatId])
 
 
@@ -61,7 +69,7 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
  */
     function Avatar(){
         if (chat.img){
-            return <img src={chat.img} />
+            return <img src={chat.img} className="chat-avatar"/>
         }
         else{
             return <div><h2>{chat.name.charAt(0).toUpperCase()+chat.name.charAt(chat.name.length-1).toLowerCase()}</h2></div>
@@ -133,10 +141,18 @@ export default function ChatArea({chatId,chat,showBackButton,setBackButtonReacti
                             <div className="message-avatar">{UserAvatar(item.user)}</div>
                             <div className="message-content">
                                 <div className="message-text">{item.content}</div>
-                                <div className="message-time">{item.created_at.slice(11,16)} <span style={{color:'red'}}>{item.is_edited ? "ed":""}</span></div>
                                 
+                                {item.attachments.map((attachment) => {
+                                    if(attachment.type.includes('image')){
+                                        return (attachment.src) ? <img src={attachment.src}/> : <div className="loading-attachment-visual"></div>
+                                    }else if(attachment.type.includes('video')){
+                                        return (attachment.src) ? <video src={attachment.src}/> : <div className="loading-attachment-visual"></div>
+                                    }else if(attachment.type.includes('audio')){
+                                        return (attachment.src) ? <audio src={attachment.src}/> : <div className="loading-attachment-audio"></div>
+                                    }
+                                })}
+                                <div className="message-time">{item.created_at.slice(11,16)} <span style={{color:'red'}}>{item.is_edited ? "ed":""}</span></div>
                             </div>
-                            
                         </div>
                         
                     )

@@ -9,6 +9,9 @@ import ProfileSettingsWindow from '../ComponentPage/SettingsComp/profileSettings
 import Create from './Create';
 
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
+
+import emptyImage from '../assets/empty-profile.png'
+
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
 
@@ -21,8 +24,9 @@ export default function Main() {
     setChatId,
     secondchatId, 
     setSecondChatId,
-    
-    userSearchActive 
+    userSearchActive,
+    me,
+    getImage
   } = useAuth();
 
   const navigate = useNavigate();
@@ -36,8 +40,23 @@ export default function Main() {
 
   const [secondchat, setSecondChat] = useState(null);
 
+  const [profileImage, setProfileImage] = useState(null);
+
   const widthref = useRef(null);
   
+  useEffect(() => {
+    const profile = me.profile;
+
+    if(profile){
+      async function WaitImage(){
+          console.log('Waiting for image... Profile id, image id:', me.id, me.profile.profile_picture_id);
+          const url = await getImage(me.profile.profile_picture_id);
+          setProfileImage(url);
+      }
+      WaitImage();
+    }
+  }, [me])
+
   useEffect(() => {
     function handleResize() {
       if (widthref.current.offsetWidth <= 768) {
@@ -149,7 +168,7 @@ export default function Main() {
             className='sidebar-top-avatar' 
             onClick={() => setShow(!show)}
           >
-            <img src={"https://randomuser.me/api/portraits/men/41.jpg"} alt="profile photo" decoding='async' />
+            <img src={profileImage || emptyImage} alt="profile photo" decoding='async' />
           </button>
 
           

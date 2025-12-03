@@ -58,6 +58,13 @@ export default function AuthContext({ children }) {
   const BASE_WS_URL = `ws://127.0.0.1:8000/` 
   const BASE_FMS_URL = 'http://localhost:8001/api/file/'
 
+  // вебсокет
+  const wsRef = useRef(null);
+  const [wsError, setWsError] = useState(null);
+
+  const [isEdit, setIsEdit] = useState(false);
+  const [editMessage, setEditMessage] = useState({});
+
   // Кінець оголошення змінних/хуків
 
 
@@ -424,6 +431,46 @@ export default function AuthContext({ children }) {
   }
 }
 
+useEffect(() => {
+    const ws = new WebSocket(`${BASE_WS_URL}ws/chat?token=${JWTaccessToken}`);
+    wsRef.current = ws;
+
+    ws.addEventListener("open", () => {
+      console.log("WS open");
+      if (!userid) console.warn("user not found");
+    });
+
+    ws.addEventListener("message", (ev) => {
+
+        
+      try {
+        const payload = JSON.parse(ev.data);
+        
+      } catch (e) {
+        console.warn("bad WS message", e);
+      }
+    });
+
+
+    ws.addEventListener("error", (e) => {
+      console.error("WS error", e);
+      const h1 = document.getElementById("status");
+      if (h1) h1.textContent = "Error WS";
+    });
+
+    ws.addEventListener("close", () => console.log("WS close"));
+    return () => ws.close();
+
+    
+
+    
+  }, [BASE_WS_URL, JWTaccessToken]); 
+
+    useEffect(()=>{
+    console.log('isEdit editMessage',isEdit,editMessage);
+
+  },[isEdit,editMessage]);
+
   // Закінчення функцій
 
 
@@ -488,6 +535,15 @@ export default function AuthContext({ children }) {
     setProfileSettingsShow,
 
     login,
+
+    // Вебсокет
+    wsRef,
+    wsError,
+
+    editMessage,
+    setEditMessage,
+    isEdit,
+    setIsEdit
   }
 
   // Кінець готування об'єкту

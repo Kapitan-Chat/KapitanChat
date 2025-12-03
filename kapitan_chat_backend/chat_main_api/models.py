@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Manager
 
 
 # Create your models here.
@@ -30,7 +31,7 @@ class Chat(models.Model):
     users = models.ManyToManyField(User, related_name='chats')
     created_by: User = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_created')
 
-    messages: list[Message]
+    messages: Manager[Message]
 
     def __str__(self):
         return f'{self.name} + created by {self.created_by.username}'

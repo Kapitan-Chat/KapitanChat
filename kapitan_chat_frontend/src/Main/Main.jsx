@@ -205,7 +205,12 @@ export default function Main() {
       {!showMenu && <>
 
       {/* содержимое чата click */}
-      <section className='current-chat'>
+      <section 
+        className='current-chat'
+        style={{
+          backgroundColor: (chatId) ? "transparent" : "rgba(217, 217, 217, 0.35)"
+        }}
+      >
         
         {
           (chatId) ? (

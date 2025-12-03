@@ -11,23 +11,23 @@ const Create = ({groupType, setActive}) => {
 
     function handleSubmit(e){
         e.preventDefault();
+        async function createNewChat(type){
+            const usersIds = addGroupUsers.map((user) => user.id)
+            const data = {
+                "name": groupName,
+                "description": groupDescription,
+                "type": type,
+                "created_by": me.id,
+                "users": [me.id, ...usersIds]
+            };
+            const response = await ChatApi().post(data);
+            const updatedChats = await GetChatList(); 
+            setChatId(response.id);
+        }
         if(groupType == 'GROUP'){
-            async function createNewChat(){
-                const usersIds = addGroupUsers.map((user) => user.id)
-                const data = {
-                    "name": groupName,
-                    "description": groupDescription,
-                    "type": "GROUP",
-                    "created_by": me.id,
-                    "users": [me.id, ...usersIds]
-                };
-                const response = await ChatApi().post(data);
-                const updatedChats = await GetChatList(); 
-                setChatId(response.id);
-            }
-            createNewChat();
+            createNewChat('GROUP');
         }else if(groupType == 'CHANNEL'){
-
+            createNewChat('CHANNEL');
         }else{
             console.log('Error! Invalid group type')
         }

@@ -54,9 +54,9 @@ export default function AuthContext({ children }) {
   const [chatList, setChatList] = useState([]);
   
   
-  const BASEAPI ="http://127.0.0.1:8000/api/"
-  const BASE_WS_URL = `ws://127.0.0.1:8000/` 
-  const BASE_FMS_URL = 'http://localhost:8001/api/file/'
+  const BASEAPI = import.meta.env.VITE_BASEAPI
+  const BASE_WS_URL = import.meta.env.VITE_BASE_WS_URL
+  const BASE_FMS_URL = import.meta.env.VITE_BASE_FMS_URL
 
   // Кінець оголошення змінних/хуків
 

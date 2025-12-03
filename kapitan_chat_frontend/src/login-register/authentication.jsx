@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 import LOGO from '../assets/logo.png';
 import styles from './authentication.module.css';
@@ -183,7 +184,7 @@ const Authentication = () => {
     // Запит на створення нового юзера. При успішному створенні одразу переходить до входу
     function RegisterRequest(details){
 
-        axios.post('http://127.0.0.1:8000/api/users/register/', details)
+        axios.post(`${import.meta.env.VITE_BASEAPI}users/register/`, details)
         .then(response => {
 
         console.log("Реєстрація успішна!");
@@ -213,7 +214,7 @@ const Authentication = () => {
 
     // Запит на перевірку вхідних данних та отримання JWT
     function LoginRequest(details){
-        axios.post('http://127.0.0.1:8000/api/users/token/', details)
+        axios.post(`${import.meta.env.VITE_BASEAPI}users/token/`, details)
         .then(response => {
             console.log("Вхід успішний!", response.data);
             

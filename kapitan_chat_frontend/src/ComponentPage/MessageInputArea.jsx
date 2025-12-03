@@ -80,7 +80,7 @@ export default function MessageInputArea({setlist,chatid,}) {
  * 
  * @throws {Error} - если возникла ошибка при отправке сообщения
  */
-    function MessageHandler(e){
+    async function MessageHandler(e){
       if(!isEdit){
         e.preventDefault();
         if(msg.length > 0 || selectedFiles.length > 0){

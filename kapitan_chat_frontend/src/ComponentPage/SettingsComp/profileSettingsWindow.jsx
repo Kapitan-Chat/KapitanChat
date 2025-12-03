@@ -5,7 +5,7 @@ import empty_profile from '../../assets/empty-profile.png'
 const ProfileSettingsWindow = () => {
     const { profileSettingsShow, setProfileSettingsShow, UserApi, FileApi , me, setMe, getImageHash, getImage } = useAuth();
 
-    const [bio, setBio] = useState(null);
+    const [bio, setBio] = useState("");
     // const [phoneNumber, setPhoneNumber] = useState(null);
     const [file, setFile] = useState(null);
     const [profileImageId, setProfileImageId] = useState(null);

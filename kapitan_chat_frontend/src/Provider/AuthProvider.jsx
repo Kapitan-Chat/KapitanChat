@@ -160,6 +160,28 @@ export default function AuthContext({ children }) {
       // delete: async (id) => api.delete(`${id}/`).then((res) => res.data),
     }
   }
+  function FileApi(URL =`api/file`){
+    const api = axios.create({
+      baseURL: BASE_FMS_URL,
+      headers: {
+        Authorization: `Bearer ${JWTaccessToken}`,
+      }
+
+    })
+
+    return{
+      post: async (formData) =>
+        api.post('', formData, {
+          headers: {
+              "Content-Type": "multipart/form-data"
+          }
+      }).then((res) => res.data),
+
+      get: async (params) => api.get(`/?id=${params.id}`, {
+        responseType: 'blob'
+      }).then((res) => res.data),
+    }
+  }
 
   async function GetChatList() {
     console.log('GetChatList');

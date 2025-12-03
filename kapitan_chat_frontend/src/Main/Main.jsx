@@ -11,6 +11,7 @@ import Create from './Create';
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
 
 import emptyImage from '../assets/empty-profile.png'
+import { useNavigate } from 'react-router-dom';
 
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
@@ -30,6 +31,7 @@ export default function Main() {
   } = useAuth();
 
   const navigate = useNavigate();
+
   if(!isAuthenticated) navigate("/authorization");
   
   const [showMenu, setShowMenu] = useState(false);

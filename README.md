@@ -72,7 +72,7 @@ KapitanChat/
 >[!NOTE]
 >TECH STACK
 
-##Tech stack
+## Tech stack
 
 - Backend
   - Python 3.x

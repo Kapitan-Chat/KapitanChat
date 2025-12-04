@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import LanguageSettings from "./languageSettings";
 import ThemeSettings from "./themeSettings";
+import ProfileSettingsButton from "./profileSettingsButton";
 export default function SettingsList({isShow,children,setShow}) {
 
     const rootRef = useRef(null);
@@ -24,6 +25,7 @@ export default function SettingsList({isShow,children,setShow}) {
 
                 <LanguageSettings />
                 <ThemeSettings />
+                <ProfileSettingsButton />
             </div>
         );
     }

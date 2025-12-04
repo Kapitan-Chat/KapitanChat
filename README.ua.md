@@ -3,63 +3,63 @@
 is chat for real ♂ pirates ♂ 
 
 
-## Table of Contents
+## Зміст
 
-- [About the project](#about-the-project)
-- [Main features](#main-features)
-- [Architecture](#architecture)
-- [Tech stack](#tech-stack)
-- [Models](#models)
-- [Getting started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend installation](#backend-installation)
-  - [Frontend installation](#frontend-installation)
-  - [Environment variables](#environment-variables)
+- [Про проєкт](#про-проєкт)
+- [Основні можливості](#основні-можливості)
+- [Архітектура](#архітектура)
+- [Стек технологій](#стек-технологій)
+- [Моделі](#моделі)
+- [Початок роботи](#початок-роботи)
+  - [Початкові вимоги](#початкові-вимоги)
+  - [Встановлення backend](#встановлення-backend)
+  - [Встановлення frontend](#встановлення-frontend)
+  - [Змінні середовища](#змінні-середовища)
 
-- [Contacts](#contacts)
+- [Контакти](#контакти)
 
-## About the project
+## Про проєкт
 
-`Kapitan Chat` is a pet chat project built as a learning and experimental playground for:
-- practicing full-stack patterns (React + Django REST);
-- working with WebSockets and real-time message updates;
-- implementing user settings (theme, language, locale);
-- practicing Git workflow (branches, PRs, merges, conflicts).
+`Kapitan Chat` — pet-проєкт чату, зібраний як навчальний та експериментальний стенд для:
+- відпрацювання full-stack патернів (React + Django REST);
+- роботи з WebSocket-ами та real-time оновленням повідомлень;
+- реалізації користувацьких налаштувань (тема, мова, локаль);
+- практики Git-workflow (гілки, PR, merge, конфлікти).
 
 
-## Main features
+## Основні можливості
 
-- **Registration and authentication**
-  - JWT-based authentication;
-  - storing tokens on the client and automatically attaching them to requests.
+- **Реєстрація та авторизація**
+  - автентифікація за допомогою JWT-токенів;
+  - зберігання токенів на клієнті та автоматичне підставлення в запити.
 
-- **Chat list and conversations**
-  - list of dialogs;
-  - viewing message history;
-  - selected chat indicators.
+- **Список чатів і переписка**
+  - список діалогів;
+  - перегляд історії повідомлень;
+  - індикатори вибраного чату.
 
-- **`Double-chat` mode**
-  - open two chats at the same time;
-  - resizable panels (resizable layout);
-  - convenient work with multiple dialogs.
+- **Режим `Double-chat`**
+  - одночасне відкриття двох чатів;
+  - зміна розміру панелей (resizable-layout);
+  - зручна робота з кількома діалогами.
 
-- **User settings**
-  - choose interface language (JSON-based locales);
-  - switch theme (light / dark);
-  - store settings on the backend.
+- **Налаштування користувача**
+  - вибір мови інтерфейсу (локалі в JSON-файлах);
+  - перемикання теми (світла / темна);
+  - зберігання налаштувань на backend-і.
 
-- **Message handling**
-  - send text messages;
-  - edit and delete messages;
-  - support for attachments (files).
+- **Робота з повідомленнями**
+  - надсилання текстових повідомлень;
+  - редагування та видалення повідомлень;
+  - підтримка вкладень (файлів).
 
-- **Real-time interface**
-  - message updates without page reload;
-  - WebSocket connection for chats.
+- **Real-time інтерфейс**
+  - оновлення повідомлень без перезавантаження сторінки;
+  - WebSocket-з’єднання для чатів.
 
-## Architecture
+## Архітектура
 
-The repository is organized as a monorepo:
+Репозиторій організований як монорепозиторій:
 
 ```text
 KapitanChat/
@@ -69,30 +69,29 @@ KapitanChat/
   LICENSE
   package-lock.json
 ```
->[!NOTE]
->TECH STACK
-
-## Tech stack
-
+>[!Note]
+>СТЕК ТЕХНОЛОГІЙ
+## Стек технологій
 - Backend
   - Python 3.x
   - Django
   - Django REST Framework
-  - djangorestframework-simplejwt (JWT authentication)
+  - djangorestframework-simplejwt (JWT-аутентификация)
   - django-cors-headers
+
 - Frontend
   - React
-  - Vite (dev server and bundler)
+  - Vite (dev-сервер и сборка)
   - react-router-dom
   - axios
   - [emoji-mart](https://github.com/missive/emoji-mart?tab=readme-ov-file)
   - [resizable-panel](https://react-resizable-panels.vercel.app/)
-- Other
-  - WebSocket / Django Channels (real-time chat)
-  - GitHub as the main code hosting
 
- ## Models
- ```
+- Інше
+  - WebSocket / Django Channels (чат в реальном часі)
+  - GitHub як сховище
+## Моделі
+```
                 ┌────────────────────────────────────┐
                 │              User                  │
                 │  (django.contrib.auth.models.User) │
@@ -122,7 +121,7 @@ KapitanChat/
                              └───────────────────────┘
 
 
-                        Users and chats
+                    Користувачі та чати
 ┌───────────────────────────────────────────────────────────────────┐
 │                              Chat                                │
 ├───────────────────────────────────────────────────────────────────┤
@@ -133,7 +132,7 @@ KapitanChat/
 │ created_at  : DateTime                                           │
 │ updated_at  : DateTime                                           │
 │ created_by  : FK → User                                          │
-│ users       : ManyToMany → User (chat participants)              │
+│ users       : ManyToMany → User (учасники чату)                  │
 └───────────────────────────────────────────────────────────────────┘
              ▲                         ▲
              │                         │
@@ -144,13 +143,13 @@ KapitanChat/
         ┌───────────────────────┐
         │       ChatType        │
         ├───────────────────────┤
-        │ DIRECT   (direct)     │
-        │ GROUP    (group)      │
-        │ CHANNEL  (channel)    │
+        │ DIRECT   (особистий)  │
+        │ GROUP    (група)      │
+        │ CHANNEL  (канал)      │
         └───────────────────────┘
 
 
-                     Messages and attachments
+                    Повідомлення та файли
 ┌───────────────────────────────────────────────────────────────┐
 │                          Message                             │
 ├───────────────────────────────────────────────────────────────┤
@@ -158,72 +157,71 @@ KapitanChat/
 │ content    : Text (null=True)                               │
 │ is_edited  : bool                                           │
 │ created_at : DateTime                                       │
-│ user       : FK → User (author)                             │
-│ chat       : FK → Chat (which chat the message belongs to)  │
+│ user       : FK → User (автор)                              │
+│ chat       : FK → Chat (у якому чаті повідомлення)          │
 │ reply_to   : FK → Message (null=True, related_name="replies")│
-│             (reply to another message)                      │
+│             (відповідь на інше повідомлення)                │
 └───────────────────────────────────────────────────────────────┘
              ▲
-             │ 1─many (one message → many attachments)
+             │ 1─many (одне повідомлення → багато вкладень)
              │
 ┌───────────────────────────────────────────────────────────────┐
 │                         Attachment                           │
 ├───────────────────────────────────────────────────────────────┤
 │ id         : PK                                              │
-│ name       : Char (file name)                               │
-│ storage_id : Char (external storage file ID, null=True)     │
-│ type       : Char (MIME / file type)                        │
+│ name       : Char (назва файлу)                             │
+│ storage_id : Char (ID файлу у зовнішньому сховищі, null=True)│
+│ type       : Char (MIME / тип файлу)                        │
 │ message    : FK → Message (null=True, on_delete=SET_NULL)   │
 └───────────────────────────────────────────────────────────────┘
 
 
 ```
 >[!WARNING]
->Getting started
-
-## Getting started
-### Prerequisites
+>ПОЧАТОК РОБОТИ
+## Початок роботи
+### Початкові вимоги 
 - Git
 - Python ≥ 3.12
 - Node.js ≥ 18
 - npm
-### Beckend Bilding
-  ```
-  cd kapitan_chat_backend
+### Встановлення backend
+```sh
+cd kapitan_chat_backend
 
-# virtual environment
+# віртуальне оточення
 python -m venv venv
 # Windows:
 venv\Scripts\activate
 # Linux/macOS:
 source venv/bin/activate
 
-# dependencies
+# залежності
 pip install -r requirements.txt
 
-# create migrations
+# створити міграцію
 py manage.py makemigrations
 
-# apply migrations
+# застосувати міграції
 python manage.py migrate
 
-# run backend
+# запуск backend
 uvicorn kapitan_chat_backend.asgi:application --reload
-
-  ```
-### Frontend installation
 ```
+### Встановлення frontend
+```sh
 cd ../kapitan_chat_frontend
 
-# install npm dependencies
+# встановлення npm-залежностей
 npm install
 
-# run dev server
+# запуск dev-сервера
 npm run dev
 
-
 ```
-## Environment variables
-...To be added soon (env)
+## Змінні середовища
 
-Apache 2.0 License 
+...Будуть додані згодом
+env
+
+Ліцензія Apache 2.0

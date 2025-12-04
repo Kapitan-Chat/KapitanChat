@@ -1,8 +1,8 @@
 ![kapita_chat](/../ImgBranch/ImgForBaseReadMe/Kapitan_chat.png)
 # Kapitan Chat
 is chat for real ♂ pirates ♂ 
-[Ukrainan language](/readme.ua.md)
-[Russian language](/readme.ru.md)
+[Ukrainan language](/README.ua.md)
+[Russian language](/README.ru.md)
 
 ## Table of Contents
 

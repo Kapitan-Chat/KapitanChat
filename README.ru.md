@@ -195,7 +195,7 @@ cd kapitan_chat_backend
 # виртуальное окружение
 python -m venv venv
 # Windows:
-# venv\Scripts\activate
+venv\Scripts\activate
 # Linux/macOS:
 source venv/bin/activate
 

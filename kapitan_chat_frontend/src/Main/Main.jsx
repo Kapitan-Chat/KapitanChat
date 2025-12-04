@@ -4,12 +4,14 @@ import Search from '../ComponentPage/Search';
 import ChatArea from '../ComponentPage/ChatArea';
 import SettingsList from '../ComponentPage/SettingsComp/SettingsList';
 import  {useAuth}  from '../Provider/AuthProvider';
-import { useState,useEffect,useMemo } from 'react';
+import { useState,useEffect,useMemo,useRef } from 'react';
 import ProfileSettingsWindow from '../ComponentPage/SettingsComp/profileSettingsWindow';
 import Create from './Create';
 
 import { useNavigate } from 'react-router-dom';
 import {Panel,PanelGroup,PanelResizeHandle} from 'react-resizable-panels';
+
+import emptyImage from '../assets/empty-profile.png'
 
 export default function Main() {
   // const isAuthenticated = localStorage.getItem("isAuthenticated");
@@ -21,17 +23,54 @@ export default function Main() {
     isAuthenticated, 
     chatId, 
     setChatId, 
-    userSearchActive 
+    userSearchActive,
+    me,
+    getImage
   } = useAuth();
 
   const navigate = useNavigate();
   if(!isAuthenticated) navigate("/authorization");
+  
+  const [showMenu, setShowMenu] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
 
   const [show, setShow] = useState(false);
   const [chat, setChat] = useState(null);
 
   const [cntrchatId, setCntrchatId] = useState(null);
   const [secondchat, setSecondChat] = useState(null);
+
+  const [profileImage, setProfileImage] = useState(null);
+
+  const widthref = useRef(null);
+  
+  useEffect(() => {
+    const profile = me.profile;
+
+    if(profile){
+      async function WaitImage(){
+          console.log('Waiting for image... Profile id, image id:', me.id, me.profile.profile_picture_id);
+          const url = await getImage(me.profile.profile_picture_id);
+          setProfileImage(url);
+      }
+      WaitImage();
+    }
+  }, [me])
+
+  useEffect(() => {
+    function handleResize() {
+      if (widthref.current.offsetWidth <= 768) {
+      setShowBackButton(true);
+    }
+    else{
+      setShowBackButton(false);
+    }
+    }
+    handleResize();
+    window.addEventListener('resize',handleResize)
+    return () => window.removeEventListener('resize',handleResize)
+    
+  },[])
 
   const [isGroupActive, setIsGroupActive] = useState();
   const [isChannelActive, setIsChannelActive] = useState();
@@ -49,9 +88,8 @@ export default function Main() {
 
   useEffect(() => {
     console.log('chatId',chatId);
-
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
-    
+    setShowMenu(false);
     setChat(chatList.find((chat) => chat.id === chatId));
     
     console.log('chatList', chatList);
@@ -60,10 +98,22 @@ export default function Main() {
 
   useEffect(() => {
     console.log('cntrchatId',cntrchatId);
+    setShowMenu(false);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
     setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
     console.log('chat',chatList);
   }, [cntrchatId]);
+
+  useEffect(() => {
+    if(!chatId && cntrchatId){
+      setChatId(cntrchatId);
+      setCntrchatId(null);
+    }
+  }, [chatId,cntrchatId]);
+
+  useEffect( () =>{
+    console.log("showmenu",showMenu)
+  },[showMenu])
 
 
 
@@ -77,13 +127,15 @@ export default function Main() {
       const c = chatId ? chat : secondchat;
       return(
         <>
-        <ChatArea chatId={cId} chat={c} />
+        <ChatArea chatId={cId} chat={c} showBackButton={showBackButton} setBackButtonReaction={setShowMenu} />
         </>
       );
     }
     else if(chatId && cntrchatId){
       return(
         <>
+        {widthref.current.offsetWidth <= 768 
+        ? <ChatArea chatId={chatId} chat={chat} showBackButton={showBackButton} setBackButtonReaction={setShowMenu} /> : 
         <PanelGroup direction='horizontal'>
           <Panel defaultSize={30} minSize={35}>
             <ChatArea chatId={chatId} chat={chat}/>
@@ -93,6 +145,7 @@ export default function Main() {
             <ChatArea chatId={cntrchatId} chat={secondchat}/>
           </Panel>
         </PanelGroup>
+        }
         </>
       );
     }
@@ -106,10 +159,10 @@ export default function Main() {
   const appcontstyle = useMemo(() => ({ padding: "20px", display: "flex",gap:"30px" }),[])
  
   return (
-    <div className="app-container" style={appcontstyle}>
+    <div className="app-container" style={appcontstyle} ref={widthref}>
 
       {/* боковое меню с переченью чатов и кнопка настроек и поиск  */}
-      <section  className="chat-list-sidebar" style={chatSectionStyle} >
+      <section  className={"chat-list-sidebar" +  (showMenu ? "active" : "") } style={chatSectionStyle} >
         <div 
           className='sidebar-top'
           style={{
@@ -125,14 +178,13 @@ export default function Main() {
             className='sidebar-top-avatar' 
             onClick={() => setShow(!show)}
           >
-            <img src={"https://randomuser.me/api/portraits/men/41.jpg"} alt="profile photo" decoding='async' />
+            <img src={profileImage || emptyImage} alt="profile photo" decoding='async' />
           </button>
-          {/* <button onClick={()=>(setChatId(null))}>chat1</button>
-          <button onClick={()=>(setCntrchatId(null))}>chat2</button> */}
+
           
           <Search isUserSearch={true} />
         </div>
-        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId}/> }
+        { (!userSearchActive && !show) && <ChatList  chatList={chatList} setChatId={setChatId} setSecondChatId={setCntrchatId} setShowMenu={setShowMenu}  /> }
 
         <div className='group-channel-buttons'>
           <button
@@ -140,11 +192,25 @@ export default function Main() {
           >Create Group</button>
           <button
             onClick={() => setIsChannelActive(true)}
-          >Create Channel</button>
+          >Create Channel</button>#
+
+          {/*кнопки выключения чата */}
+          {/* <button onClick={()=>(setChatId(null))}>chat1 is {chatId}</button>
+          <button onClick={()=>(setCntrchatId(null))}>chat2 is {cntrchatId}</button> */}
+          
         </div>
+        
       </section>
-      {/* содержимое чата */}
-      <section className='current-chat'>
+
+      {!showMenu && <>
+
+      {/* содержимое чата click */}
+      <section 
+        className='current-chat'
+        style={{
+          backgroundColor: (chatId) ? "transparent" : "rgba(217, 217, 217, 0.35)"
+        }}
+      >
         
         {
           (chatId) ? (
@@ -155,6 +221,10 @@ export default function Main() {
         }
         
       </section>
+      </>}
+      
+      
+    
 
       <ProfileSettingsWindow />
 

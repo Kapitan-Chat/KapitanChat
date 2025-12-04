@@ -119,6 +119,11 @@ const ProfileSettingsWindow = () => {
                 /> */}
 
                 <input type="submit" />
+
+                <button className="about-exit" onClick={(e) => {
+                    e.preventDefault();
+                    setProfileSettingsShow(false);
+                }}>🗙</button>
             </form>
         </div>
      );

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 import LOGO from '../assets/logo.png';
 import styles from './authentication.module.css';
@@ -15,7 +16,10 @@ const Authentication = () => {
         token,
         setToken,
 
-        login
+        login,
+        local,
+        settingparams,
+        setSettingparams,
     } = useAuth();
 
     const navigate = useNavigate();
@@ -180,7 +184,7 @@ const Authentication = () => {
     // Запит на створення нового юзера. При успішному створенні одразу переходить до входу
     function RegisterRequest(details){
 
-        axios.post('http://127.0.0.1:8000/api/users/register/', details)
+        axios.post(`${import.meta.env.VITE_BASEAPI}users/register/`, details)
         .then(response => {
 
         console.log("Реєстрація успішна!");
@@ -210,7 +214,7 @@ const Authentication = () => {
 
     // Запит на перевірку вхідних данних та отримання JWT
     function LoginRequest(details){
-        axios.post('http://127.0.0.1:8000/api/users/token/', details)
+        axios.post(`${import.meta.env.VITE_BASEAPI}users/token/`, details)
         .then(response => {
             console.log("Вхід успішний!", response.data);
             
@@ -283,6 +287,8 @@ const Authentication = () => {
     }
 
     function bubble_text_animate(text){
+   
+
         if(chatBubbleRef.current && text && !bubble_chat_animation){
             bubble_chat_animation = true;
             let currentText = "Kapitan$\n\n";
@@ -309,9 +315,11 @@ const Authentication = () => {
     }
 
     useEffect(() => {
-        setTimeout(() => {
+        const st = setTimeout(() => {
             bubble_text_animate("Welcome to Kapitan Chat! Login or register")
         }, 500)
+        
+        return ()=>{clearTimeout(st)}
     }, []);
 
 

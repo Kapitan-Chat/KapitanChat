@@ -14,7 +14,9 @@ import { useAuth } from "../Provider/AuthProvider";
         isUser=false,
         isNewChat=false, 
         forGroupchat=false,
-        setSecondChatId
+        setSecondChatId,
+
+        setShowMenu,
     }) {
     const { ChatApi, me, setUserSearchActive, GetChatList, addGroupUsers, setAddGroupUsers, getImage } = useAuth();
 
@@ -77,8 +79,10 @@ import { useAuth } from "../Provider/AuthProvider";
                 <div 
                     className={`chat-item${chat.active ? " active" : ""}`} 
                     key={chat.id} 
-                    onClick={(e)=>handleChatClick(e, chat.id, chat)}
+                    onClick={(e)=>{handleChatClick(e, chat.id, chat); setShowMenu(false)}}
                     style={{ animationDelay: `${i * 0.15 + 1.5}s` }}
+
+                    
                 >
                     
                     <div className="chat-header">

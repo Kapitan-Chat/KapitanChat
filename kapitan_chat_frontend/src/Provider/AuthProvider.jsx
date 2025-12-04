@@ -1,4 +1,3 @@
-
 import { 
   createContext, useState, useEffect, useContext, useRef
 } from "react";
@@ -39,7 +38,7 @@ export default function AuthContext({ children }) {
   const [local, setLocal] = useState({});
 
   //theme true is dark false is light
-  const [settingparams, setSettingparams] = useState({user:1,language:"en",theme:false});
+  const [settingparams, setSettingparams] = useState({user:null,language:"en",theme:false});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // const [chatList, setChatList] = useState([
@@ -55,10 +54,16 @@ export default function AuthContext({ children }) {
   const [chatList, setChatList] = useState([]);
   
   
-  const SETTINGSURL = `http://127.0.0.1:8000/api/settings/${userid}/`;
-  const BASEAPI ="http://127.0.0.1:8000/api/"
-  const BASE_WS_URL = `ws://127.0.0.1:8000/` 
-  const BASE_FMS_URL = 'http://localhost:8001/api/file/'
+  const BASEAPI = import.meta.env.VITE_BASEAPI
+  const BASE_WS_URL = import.meta.env.VITE_BASE_WS_URL
+  const BASE_FMS_URL = import.meta.env.VITE_BASE_FMS_URL
+
+  // вебсокет
+  const wsRef = useRef(null);
+  const [wsError, setWsError] = useState(null);
+
+  const [isEdit, setIsEdit] = useState(false);
+  const [editMessage, setEditMessage] = useState({});
 
   // Кінець оголошення змінних/хуків
 
@@ -66,16 +71,19 @@ export default function AuthContext({ children }) {
 
   // Функції
 
-  async function getSettings (url = SETTINGSURL) {
-    const res = await axios.get(url);
-    return res.data;
+  function SettingsApi(URL =`${BASEAPI}settings/`){
+    const api = axios.create({
+      baseURL: URL,
+      headers: {
+        Authorization: `Bearer ${JWTaccessToken}`,
+      }
+    })
+    return{
+    get: async (id) => api.get(`${id}/`).then((res) => res.data),
+    put: async (id, data) => api.put(`${id}/`, data).then((res) => res.data),
+    post: async (data) => api.post('', data).then((res) => res.data),
   }
-
-  async function putSettings (url = SETTINGSURL) {
-    const res = await axios.put(url, settingparams);
-    console.log(res.data);
-    return res.data;
-  }
+}
 
   function UserApi(URL =`${BASEAPI}users/`){
     const api = axios.create({
@@ -109,13 +117,31 @@ export default function AuthContext({ children }) {
     })
 
     return{
-      getList: async () => api.get('').then((res) => res.data),
+      getList: async () => api.get('?reverse=true').then((res) => res.data),
       get: async (id) => api.get(`${id}/`).then((res) => res.data),
       post: async (data) => api.post('', data).then((res) => res.data),
 
       //сейчас пута нету, так как другая система создания
       // put: async (id, data) => api.put(`${id}/`, data).then((res) => res.data),
       delete: async (id) => api.delete(`${id}/`).then((res) => res.data),
+    }
+  }
+
+  function AttachmentApi(URL =`${BASEAPI}chat/attachment`){
+    const api = axios.create({
+      baseURL: URL,
+      headers: {
+        Authorization: `Bearer ${JWTaccessToken}`,
+      }
+
+    })
+
+    return{
+      get: async (id) => api.get(`id=${id}/`).then((res) => res.data),
+      post: async (data) => api.post(`/`, data).then((res) => res.data),
+      put: async (data) => api.put(`id=${id}/`, data).then((res) => res.data),
+      patch: async (data) => api.patch(`id=${id}`, data).then((res) => res.data),
+      delete: async (id) => api.delete(`id=${id}` ).then((res) => res.data),
     }
   }
 
@@ -161,39 +187,63 @@ export default function AuthContext({ children }) {
 
   async function GetChatList() {
     console.log('GetChatList');
-    const me = await UserApi().getMe();
-        setMe(me);
-        setUserid(me.id);
-        console.log('me',me);
+    const mee = await UserApi().getMe();
+    console.log('mee',mee);
+        setMe(mee);
+        setUserid(mee.id);
+        console.log('me',mee);
         
-        
+        SettingsApi().get(mee.id).then((res) => {
+          console.log('Settings fetched successfully:', res);
+          setSettingparams({user:mee.id, theme:res.theme, language:res.language});
+          console.log('res.language_choices',res.language_choices);
+          setLangChoiceList([...res.language_choices]);
+        })
+        .catch((error) => {
+          SettingsApi().post({user:mee.id, theme:false, language:'en-US'}).then((res) => {
+             setSettingparams({user:mee.id, theme:res.theme, language:res.language});
+            setLangChoiceList(...res.language_choices);
+          })
+          .catch((error) => {
+            console.error('Error creating settings:', error);
+          });
+        });
         const chat = await ChatApi().getList();
 
         const finalchat = await Promise.all(
           chat.map(async (item) =>
           {
-            const users = item.users;
-            const anotherUserid = users.find((u) => u != me.id)
-            const anotherUser = await UserApi().get(anotherUserid)
-            console.log('anotherUser',anotherUser)
-            return {...item, active:false,name: anotherUser.username}
+            return {...item, active:false}
           })
         );
         setChatList(finalchat)
 
         console.log('finalchat',finalchat);
+
+        chat.forEach(async (item) => {
+          if (item.type === "DIRECT") {
+            const otherUser = item.users.find((u) => u.id !== mee.id);
+            if (!otherUser) return;
+
+            const img = await getProfileImage(item.users[otherUser]);
+
+            setChatList((prev) =>
+              prev.map((chat) =>
+                chat.id === item.id ? { ...chat, img: img } : chat
+              )
+            );
+          }
+        });
+        console.log('finalchat with profile images:',finalchat);
   }
 
+  useEffect(() => {
+    console.log('langChoiceList',langChoiceList);
+  },[langChoiceList])
 
   //первоначальная загрузка
   useEffect(() => {
-    console.log('AuthProvider useEffect START');
     try {
-      getSettings().then((res) => {
-        setLangChoiceList(res.language_choices);
-        setLocal(res.locale);
-        setSettingparams({user:res.user,language:res.language,theme:res.theme});
-      });
       (async()=>
       {
         let access  = localStorage.getItem('access');
@@ -242,6 +292,8 @@ export default function AuthContext({ children }) {
   useEffect(() => {
     (async () => {
       GetChatList();
+
+    
     })();
     
   },[JWTaccessToken]);
@@ -249,8 +301,9 @@ export default function AuthContext({ children }) {
 
   const first = useRef(true);
   useEffect(() => {
+    setLocal(settingparams.local);
     if (first.current) { first.current = false; return; }
-    putSettings();
+    SettingsApi().put(settingparams.id, settingparams);
   }, [settingparams]);
 
   useEffect(() => {
@@ -265,6 +318,15 @@ export default function AuthContext({ children }) {
   const login = () => {
     localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
+    (async () => {
+      mee = await UserApi().getMe();
+      let settingParams = {
+        user: mee.id,
+        language: 'en-US',
+        theme: false
+      }
+      setSettingparams(postSettings(settingParams));
+    })
    
   };
 
@@ -294,6 +356,120 @@ export default function AuthContext({ children }) {
         console.error("Image fetch error:", error);
     }
   }
+
+  async function getProfileImage(id){
+    try{
+      console.log('Getting profile image of user', id);
+      const user = await UserApi().get(id);
+      console.log('User found!', user);
+
+      const imageUrl = await getImage(user.profile.profile_picture_id);
+
+      return imageUrl;
+    } catch (err) {
+      console.log('Getting profile image error:', err.message);
+    }
+    
+  }
+
+  async function uploadAttachments(selectedFiles){
+    try{
+      let attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+        const hash = await getImageHash(file);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("hash", hash);
+
+        const uploadedFile = await FileApi().post(formData);
+
+        const attachmentData = {
+          name: file.name,
+          storage_id: uploadedFile.id,
+          type: file.type
+        }
+
+        const uploadedAttachment = await AttachmentApi().post(attachmentData);
+
+        return uploadedAttachment;
+
+        })
+      )
+
+      return attachments;
+    } catch (err) {
+      console.log('Error while trying to upload selected files:', err);
+    }
+    
+  }
+
+  async function getAttachmentsSrc(messageList) {
+  try {
+    const newMessageList = await Promise.all(
+      messageList.map(async (message) => {
+
+        if (!message.attachments || message.attachments.length === 0) {
+          return message;
+        }
+
+        const newAttachments = await Promise.all(
+          message.attachments.map(async (attachment) => {
+            const src = await getImage(attachment.storage_id);
+            return { ...attachment, src };
+          })
+        );
+
+        return { ...message, attachments: newAttachments };
+      })
+    );
+
+    return newMessageList;
+
+  } catch (err) {
+    console.log('Error while getting srcs of attachments:', err);
+  }
+}
+
+useEffect(() => {
+    const ws = new WebSocket(`${BASE_WS_URL}ws/chat?token=${JWTaccessToken}`);
+    wsRef.current = ws;
+
+    ws.addEventListener("open", () => {
+      console.log("WS open");
+      if (!userid) console.warn("user not found");
+    });
+
+    ws.addEventListener("message", (ev) => {
+
+        
+      try {
+        const payload = JSON.parse(ev.data);
+        
+      } catch (e) {
+        console.warn("bad WS message", e);
+      }
+    });
+
+
+    ws.addEventListener("error", (e) => {
+      console.error("WS error", e);
+      const h1 = document.getElementById("status");
+      if (h1) h1.textContent = "Error WS";
+    });
+
+    ws.addEventListener("close", () => console.log("WS close"));
+    return () => ws.close();
+
+    
+
+    
+  }, [BASE_WS_URL, JWTaccessToken]); 
+
+    useEffect(()=>{
+    console.log('isEdit editMessage',isEdit,editMessage);
+
+  },[isEdit,editMessage]);
 
   // Закінчення функцій
 
@@ -333,6 +509,7 @@ export default function AuthContext({ children }) {
     ChatApi,
     MessageApi,
     FileApi,
+    AttachmentApi,
 
     JWTaccessToken,
     JWTrefreshToken,
@@ -349,9 +526,24 @@ export default function AuthContext({ children }) {
 
     getImageHash,
     getImage,
+    getProfileImage,
+
+    uploadAttachments,
+    getAttachmentsSrc,
 
     profileSettingsShow,
-    setProfileSettingsShow
+    setProfileSettingsShow,
+
+    login,
+
+    // Вебсокет
+    wsRef,
+    wsError,
+
+    editMessage,
+    setEditMessage,
+    isEdit,
+    setIsEdit
   }
 
   // Кінець готування об'єкту

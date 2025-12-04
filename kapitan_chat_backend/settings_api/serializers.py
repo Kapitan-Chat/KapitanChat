@@ -13,7 +13,7 @@ def load_locale(code: str) -> dict:
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):
-    user = serializers.CurrentUserDefault()
+    id = serializers.SerializerMethodField(read_only=True)
     
     language = serializers.ChoiceField(choices=Lang.choices)
     theme = serializers.BooleanField(default=False)
@@ -22,7 +22,7 @@ class UserSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserSettings
-        fields = ["id","user", "language", "theme", "locale", "language_choices"]
+        fields = ["id", "language", "theme", "locale", "language_choices"]
 
     def get_locale(self, obj):
         try:
@@ -32,3 +32,6 @@ class UserSettingsSerializer(serializers.ModelSerializer):
         
     def get_language_choices(self, obj):
         return [v for v, l in Lang.choices]
+    
+    def get_id(self, obj):
+        return obj.user.id

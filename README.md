@@ -3,7 +3,6 @@
 This is chat for real ♂ pirates ♂ <br>
 🇺🇦 [Ukrainan language](/README.ua.md)
 <br>
-🇷🇺 [Russian language](/README.ru.md)
 
 ## Table of Contents
 

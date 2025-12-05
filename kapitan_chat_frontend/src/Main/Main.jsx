@@ -31,7 +31,7 @@ export default function Main() {
   const navigate = useNavigate();
   if(!isAuthenticated) navigate("/authorization");
   
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(true);
   const [showBackButton, setShowBackButton] = useState(false);
 
   const [show, setShow] = useState(false);
@@ -41,6 +41,8 @@ export default function Main() {
   const [secondchat, setSecondChat] = useState(null);
 
   const [profileImage, setProfileImage] = useState(null);
+
+  const [width, setWidth] = useState(window.innerWidth);
 
   const widthref = useRef(null);
   
@@ -83,13 +85,12 @@ export default function Main() {
     setTimeout(() => {
       setSidebarTopOpacity(1);
       setSidebarTopTranslate('0');
-    }, 1250)
+    }, 1250);
   }, []);
 
   useEffect(() => {
     console.log('chatId',chatId);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === chatId })));
-    setShowMenu(false);
     setChat(chatList.find((chat) => chat.id === chatId));
     
     console.log('chatList', chatList);
@@ -98,7 +99,6 @@ export default function Main() {
 
   useEffect(() => {
     console.log('cntrchatId',cntrchatId);
-    setShowMenu(false);
     setChatList((chatList) => chatList.map((chat) => ({ ...chat, active: chat.id === cntrchatId })));
     setSecondChat(chatList.find((chat) => chat.id === cntrchatId));
     console.log('chat',chatList);
@@ -159,10 +159,10 @@ export default function Main() {
   const appcontstyle = useMemo(() => ({ padding: "20px", display: "flex",gap:"30px" }),[])
  
   return (
-    <div className="app-container" style={appcontstyle} ref={widthref}>
+    <div className="app-container"  ref={widthref}>
 
       {/* боковое меню с переченью чатов и кнопка настроек и поиск  */}
-      <section  className={"chat-list-sidebar" +  (showMenu ? "active" : "") } style={chatSectionStyle} >
+      {(showMenu || width > 768) && <section  className={"chat-list-sidebar" +  (showMenu ? " active" : "") } style={chatSectionStyle} >
         <div 
           className='sidebar-top'
           style={{
@@ -200,9 +200,9 @@ export default function Main() {
           
         </div>
         
-      </section>
+      </section>}
 
-      {!showMenu && <>
+      {(!showMenu || width > 768)&& <>
 
       {/* содержимое чата click */}
       <section 

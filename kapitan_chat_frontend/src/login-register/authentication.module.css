@@ -100,6 +100,30 @@
     }
 }
 
+@media screen and (max-width: 500px){
+    .authentication_form{
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    .chat_bubble{
+        top: 42.5% !important;
+        left: 50% !important;
+        transform: translate(-50%, -42.5%);
+        width: 90% !important;
+        font-size: 26px !important;
+    }
+
+    .register_steps_wrapper{
+        width: 90% !important;
+    }
+    .register_step input{
+        width: 90% !important;
+    }
+    
+}
+
 
 .authentication_container{
     position: absolute;

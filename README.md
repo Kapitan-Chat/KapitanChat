@@ -217,6 +217,10 @@ npm run dev
 >for `VITE_BASE_FMS_URL` (files)
 >you need to run an additional microservice
 >from https://github.com/Kapitan-Chat/StorageService
+
+>[!note]
+>create a `.env` file in the root of the frontend project and put the environment variables there
+
 ```env
 VITE_BASEAPI="http://127.0.0.1:8000/api"
 VITE_BASE_WS_URL="ws://127.0.0.1:8000/api"

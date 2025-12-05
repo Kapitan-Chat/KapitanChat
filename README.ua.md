@@ -231,6 +231,6 @@ npm run dev
 VITE_BASEAPI="http://127.0.0.1:8000/api"
 VITE_BASE_WS_URL="ws://127.0.0.1:8000/api"
 VITE_BASE_FMS_URL="http://127.0.0.1:8000/"
-
+```
 
 Ліцензія Apache 2.0

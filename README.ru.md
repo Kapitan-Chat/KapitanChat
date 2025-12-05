@@ -216,7 +216,7 @@ uvicorn kapitan_chat_backend.asgi:application --reload
 
 ### Установка frontend 
 ```
-cd /kapitan_chat_frontend
+cd kapitan_chat_frontend
 
 # установка npm-зависимостей
 npm install

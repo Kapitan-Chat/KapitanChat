@@ -212,9 +212,15 @@ npm install
 npm run dev
 
 ```
-## Environment variables
-
-...To be added soon
-env
+## Environment variables for the frontend
+>[!Warning]
+>for `VITE_BASE_FMS_URL` (files)
+>you need to run an additional microservice
+>from https://github.com/Kapitan-Chat/StorageService
+```env
+VITE_BASEAPI="http://127.0.0.1:8000/api"
+VITE_BASE_WS_URL="ws://127.0.0.1:8000/api"
+VITE_BASE_FMS_URL="http://127.0.0.1:8000/"
+```
 
 Apache 2.0 License

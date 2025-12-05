@@ -231,7 +231,7 @@ npm run dev
 >надо качать дополнительный микросервис
 >с https://github.com/Kapitan-Chat/StorageService
 
->[!Info]
+>[!note]
 >создайте .env в корне фронтенд-проекта и запишите туда переменные среды
 ```env
 VITE_BASEAPI="http://127.0.0.1:8000/api"

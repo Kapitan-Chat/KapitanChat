@@ -15,7 +15,7 @@ This is chat for real ♂ pirates ♂ <br>
   - [Prerequisites](#prerequisites)
   - [Backend installation](#backend-installation)
   - [Frontend installation](#frontend-installation)
-  - [Environment variables](#environment-variables)
+  - [Environment variables](#environment-variables-for-the-frontend)
 
 - [Contacts](#contacts)
 

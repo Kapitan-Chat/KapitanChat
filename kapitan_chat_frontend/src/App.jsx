@@ -5,22 +5,27 @@ import NotFound from "./ComponentPage/NotFound";
 import "./mainstyle.css";
 import AuthProvider from "./Provider/AuthProvider";
 import AvatarUpload from "./ComponentPage/AvatarUpload";
-import Authentication from "./login-register/authentication"
+import Authentication from "./login-register/authentication";
 
 function App() {
-  
   return (
-    <AuthProvider> 
+    <AuthProvider>
       <Routes>
-   
-        <Route index element={<Main></Main>}></Route>
-        <Route path="main" element={<><Main /></>}></Route>
-        <Route path="authorization" element={<><Authentication /></>}></Route>
-        <Route path="avatar" element={<><AvatarUpload /></>}></Route>
-        <Route path="*" element={<><NotFound/></>} />
-      
+        <Route index element={<Main />}></Route>
+        <Route path="main" element={<Main />}></Route>
+        <Route
+          path="authorization"
+          element={<Authentication authType="register" />}
+        />
+        <Route
+          path="register"
+          element={<Authentication authType="register" />}
+        />
+        <Route path="login" element={<Authentication authType="login" />} />
+        <Route path="avatar" element={<AvatarUpload />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-   
+
       <Outlet />
     </AuthProvider>
   );

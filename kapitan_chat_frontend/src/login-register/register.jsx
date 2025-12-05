@@ -1,141 +1,327 @@
-import { useEffect, useRef, useState } from 'react';
-import styles from './authentication.module.css';
-import RegisterStep from './registerStep';
+import { useEffect, useRef, useState } from "react";
+import styles from "./authentication.module.css";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Provider/AuthProvider";
+import {
+  loginRequest,
+  registerRequest,
+  validateEmail,
+  validatePhone,
+  validateUsername,
+} from "./requests";
 
-const Register = ({auth, formDetails}) => {
-    const [authType, setAuthType] = auth;
-    const {
-        registerUsername,
-        setRegisterUsername,
-        registerPassword,
-        setRegisterPassword,
-        email,
-        setEmail,
-        registerConfirmPassword,
-        setRegisterConfirmPassword,
+const RegisterStep = ({ registerStepDetails, stepNumber, errors }) => {
+  const [currentStep, setCurrentStep] = stepNumber;
+
+  const classname = `${styles.register_step} 
+                      register-step-number-${currentStep + 1}`;
+
+  return (
+    <div className={classname}>
+      {registerStepDetails.map((field, i) => {
+        const [value, setValue, placeholder, required, _, fieldType] = field;
+        return (
+          <input
+            key={currentStep + 1 + "_" + i}
+            type={fieldType ? fieldType : "text"}
+            placeholder={placeholder}
+            required={required}
+            value={value}
+            style={{
+              border: !errors[i]
+                ? "3px solid rgb(219, 146, 146)"
+                : "0px solid white",
+            }}
+            onChange={(e) => {
+              setValue(e.target.value);
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const Register = ({ onSubmit, animations }) => {
+  //form data
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [inProcessState, setInProcess] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [validationErrors, setValidationErrors] = useState([]);
+
+  const navigate = useNavigate();
+
+  const auth = useAuth();
+
+  const startRegistration = () => {
+    setInProcess("Registration...");
+    const requestBody = {
+      username,
+      password,
+      phone_number: phoneNumber,
+      first_name: firstName,
+    };
+    if (lastName !== "") requestBody.last_name = lastName;
+    if (email !== "") requestBody.email = email;
+    registerRequest(requestBody, (isSuccess) => {
+      if (isSuccess) {
+        setInProcess("Logging in...");
+        loginRequest({ username, password }, auth, (success) => {
+          if (success) {
+            setInProcess(null);
+            navigate("/main");
+          } else {
+            animations.animateText("An error was occurred");
+            animations.angry();
+
+            setInProcess(null);
+          }
+        });
+      } else {
+        animations.animateText("An error was occurred");
+        animations.angry();
+
+        setInProcess(null);
+      }
+    });
+  };
+
+  onSubmit.current = (e) => {
+    console.log(currentStep);
+    const current = Object.values(registerStepsDetails)[currentStep - 1];
+    const res = validateFields(true);
+    console.log("validation result", res);
+
+    const action =
+      currentStep < Object.keys(registerStepsDetails).length
+        ? () => setCurrentStep(currentStep + 1)
+        : () => startRegistration();
+
+    if (res.every(Boolean)) {
+      let isErrorSet = false;
+      let isFetching = false;
+      const needToRequest = [];
+      for (const f of current) {
+        console.log(f);
+        if (f[8] && f[0] !== "") {
+          needToRequest.push(f);
+        }
+      }
+      if (needToRequest.length) {
+        let did = 0;
+        for (const f of needToRequest) {
+          isFetching = true;
+          f[8](f[0]).then((res) => {
+            if (res !== null) {
+              if (res) {
+                if (++did == needToRequest.length) action();
+              } else {
+                if (!isErrorSet) {
+                  isErrorSet = true;
+                  animations.animateText(f[9]);
+                  animations.angry();
+                }
+              }
+            } else {
+              if (!isErrorSet) {
+                isErrorSet = true;
+                animations.animateText("An error was occurred");
+                animations.angry();
+              }
+            }
+          });
+        }
+      }
+      if (!isFetching) {
+        action();
+      }
+    }
+  };
+
+  const registerStepsDetails = {
+    username: [
+      [
+        username,
+        setUsername,
+        "Enter your username",
+        true,
+        /^[A-Za-z][A-Za-z0-9]{3,32}$/,
+        undefined,
+        undefined,
+        "Please, enter a valid login",
+        validateUsername,
+        "This username is taken, try other one",
+      ],
+    ],
+    names: [
+      [
         firstName,
         setFirstName,
+        "Enter your first name",
+        true,
+        /^\p{L}{2,32}$/u,
+        undefined,
+        undefined,
+        "Please, enter a valid name",
+      ],
+      [
         lastName,
         setLastName,
+        "Enter your last name",
+        false,
+        /^\p{L}{2,32}$/u,
+        undefined,
+        undefined,
+        "Please, enter a valid surname",
+      ],
+    ],
+    email: [
+      [
         phoneNumber,
-        setPhoneNumber
-    } = formDetails;
+        setPhoneNumber,
+        "Enter your phone number",
+        true,
+        /^\+?[0-9\s\-()]{10,20}$/,
+        undefined,
+        undefined,
+        "Please, enter a valid phone number (+xxxaaabbcc)",
+        validatePhone,
+        "Account with this phone number already registered!",
+      ],
+      [
+        email,
+        setEmail,
+        "Enter your email",
+        false,
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+        "EMAIL",
+        undefined,
+        "Please, enter a valid email",
+        validateEmail,
+        "Account with this email already registered!",
+      ],
+    ],
+    password: [
+      [
+        password,
+        setPassword,
+        "Enter your password",
+        true,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/,
+        "PASSWORD",
+        undefined,
+        "Your password is insecure, use letters, numbers and symbols",
+      ],
+      [
+        confirmPassword,
+        setConfirmPassword,
+        "Enter your password",
+        true,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/,
+        "PASSWORD",
+        password,
+        "Your passwords are not similar",
+      ],
+    ],
+  };
 
-    // Деталі які буду ітеруватися для покрокової реєстрації
-    const usernameRef = useRef();
-    const firstNameRef = useRef();
-    const lastNameRef = useRef();
-    const emailRef = useRef();
-    const phoneNumberRef = useRef();
-    const passwordRef = useRef();
-    const confirmPasswordRef = useRef();
+  function validateFields(isOnSubmit = false) {
+    const stepFields = Object.values(registerStepsDetails)[currentStep - 1];
+    const errors = [];
+    let isOnInvalidUsed = false;
 
-    const registerStepsDetails = {
-        username : [
-            [registerUsername, setRegisterUsername, "Enter your username", usernameRef, "MANDATORY", /^[A-Za-z][A-Za-z0-9]{3,}$/],
-        ],
-        names : [
-            [firstName, setFirstName, "Enter your first name", firstNameRef, "MANDATORY", /^[A-Za-z]{2,}$/],
-            [lastName, setLastName, "Enter your last name", lastNameRef, "MANDATORY", /^[A-Za-z]{2,}$/]
-        ],
-        email : [
-            [email, setEmail, "Enter your email", emailRef, "MANDATORY", "EMAIL", /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/],
-        ],
-        phoneNumber : [
-            [phoneNumber, setPhoneNumber, "Enter your phone number", phoneNumberRef, "MANDATORY", "PHONENUMBER", /^\+?[0-9\s\-()]{10,20}$/]
-        ],
-        password : [
-            [registerPassword, setRegisterPassword, "Enter your password", passwordRef, "MANDATORY", "PASSWORD", /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/],
-            [registerConfirmPassword, setRegisterConfirmPassword, "Enter your password", confirmPasswordRef, "MANDATORY", "PASSWORD", /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/]
-        ]
+    for (const v of stepFields) {
+      const [value, _, _1, required, regex, _3, match, onInvalid] = v;
+      const res =
+        (regex.test(value) && (match ? match === value : true)) ||
+        (!required && value === "");
+      errors.push(res);
+      if (isOnSubmit && !res && !isOnInvalidUsed && onInvalid) {
+        animations.animateText(onInvalid);
+        animations.angry();
+        isOnInvalidUsed = true;
+      }
     }
 
-    const [currentStep, setCurrentStep] = useState(1);
+    return errors;
+  }
 
-    useEffect(() => {
-        Object
-            .values(registerStepsDetails)
-            .forEach(step => {
-                step.forEach(field => {
-                    const ref = field[3];
-                    if (ref?.current) {
-                        ref.current.parentElement.classList.add(styles.hiddenStep);
-                        ref.current.parentElement.classList.remove(styles.visibleStep);
-                    }
-                });
-            });
+  useEffect(
+    () => setValidationErrors(validateFields()),
+    [
+      username,
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+      confirmPassword,
+      currentStep,
+    ]
+  );
 
-        Object
-            .values(registerStepsDetails)
-            .forEach((field, i) => {
-                if (i == currentStep - 1 && field[0][3]?.current)
-                    field.forEach((item) => {
-                        item[3].current.parentElement.classList.add(styles.visibleStep)
-                        item[3].current.parentElement.classList.remove(styles.hiddenStep)
-                    })
-            })
-
-        console.log("Current step: ", currentStep)
-    }, [currentStep]);
-
-    function CheckCurrentFields() {
-        const stepFields = Object.values(registerStepsDetails)[currentStep - 1];
-        let allValid = true;
-
-        stepFields.forEach((item) => {
-            if (!item[3].current) return;
-            const regex = item[item.length - 1];
-            const value = item[3].current.value;
-
-            if (!regex.test(value)) {
-                allValid = false;
-                item[3].current.style.border = "3px solid rgb(219, 146, 146)";
-                return true;
-            } else {
-                item[3].current.style.border = "0px solid white";
-                return false;
+  return (
+    <div className={styles.register_content}>
+      <h2 className={styles.register_title}>Register</h2>
+      <div className={styles.register_steps_wrapper}>
+        {
+          <RegisterStep
+            stepNumber={[currentStep, setCurrentStep]}
+            registerStepDetails={
+              Object.values(registerStepsDetails)[currentStep - 1]
             }
-        });
-
-        return allValid;
-    }
-
-    return ( 
-        <div className={styles.register_content}>
-            <h2 className={styles.register_title}>Register</h2>
-            <div className={styles.register_steps_wrapper}>
-                {
-                    Object
-                        .values(registerStepsDetails)
-                        .map((step, i) => {
-                            return <RegisterStep 
-                                key={i} 
-                                stepNumber={[currentStep, setCurrentStep]} 
-                                registerStepDetails={step}/>
-                        })
-                }
-                <div className={styles.register_nav}>
-                    { (currentStep > 1) && <div 
-                            className={[styles.register_nav_button, styles.left_register_nav_button].join(' ')} 
-                            onClick={() => {
-                                setCurrentStep(currentStep - 1)
-                            }}>Back
-                        </div>
-                    }
-                    { (currentStep < 5) && <div 
-                        className={[styles.register_nav_button, styles.right_register_nav_button].join(' ')} 
-                        onClick={() => {
-                            if(CheckCurrentFields())
-                                setCurrentStep(currentStep + 1)
-                        }}>Continue</div>
-                    }
-
-                    { (currentStep == 5) && <button className={[styles.register_button, styles.right_register_nav_button].join(' ')}>Create account</button>}
-                </div>
+            errors={validationErrors}
+          />
+        }
+        <div className={styles.register_nav}>
+          {currentStep > 1 && (
+            <div
+              className={[
+                styles.register_nav_button,
+                styles.left_register_nav_button,
+              ].join(" ")}
+              onClick={() => setCurrentStep(currentStep - 1)}
+            >
+              Back
             </div>
-            <p className={styles.bottom_text}>Already have an account? <span onClick={() => setAuthType('login')}>Log in</span></p>
-        </div> 
-     );
-}
- 
+          )}
+          {currentStep < Object.keys(registerStepsDetails).length ? (
+            <button
+              type="submit"
+              className={[
+                styles.register_nav_button,
+                styles.right_register_nav_button,
+              ].join(" ")}
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={inProcessState != null}
+              className={[
+                styles.register_button,
+                styles.right_register_nav_button,
+              ].join(" ")}
+            >
+              {inProcessState ? inProcessState : "Create account"}
+            </button>
+          )}
+        </div>
+      </div>
+      <p className={styles.bottom_text}>
+        Already have an account?{" "}
+        <span onClick={() => navigate("/login")}>Log in</span>
+      </p>
+    </div>
+  );
+};
+
 export default Register;

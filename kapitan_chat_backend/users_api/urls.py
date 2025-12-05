@@ -2,9 +2,10 @@ from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from .views import RegisterView, GetMe, Users, SearchApiView, ProfileView
+from .views import RegisterView, GetMe, Users, SearchApiView, ProfileView, ValidationViewSet
 
 router = DefaultRouter()
+router.register(r"validation", ValidationViewSet, basename="validation")
 
 
 urlpatterns = [

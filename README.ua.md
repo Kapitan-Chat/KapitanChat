@@ -227,6 +227,10 @@ npm run dev
 >для `VITE_BASE_FMS_URL` (файли)
 >потрібно запустити додатковий мікросервіс
 >з https://github.com/Kapitan-Chat/StorageService
+
+>[!note]
+>створіть файл `.env` у корені фронтенд-проєкту та запишіть туди змінні середовища
+
 ```env
 VITE_BASEAPI="http://127.0.0.1:8000/api"
 VITE_BASE_WS_URL="ws://127.0.0.1:8000/api"

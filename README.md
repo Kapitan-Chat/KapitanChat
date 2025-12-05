@@ -198,9 +198,12 @@ python manage.py migrate
 uvicorn kapitan_chat_backend.asgi:application --reload
 
 ```
+>[!Warning]
+>Before entering commands, open a second terminal
+
 ### Frontend installation
 ```sh
-cd ../kapitan_chat_frontend
+cd kapitan_chat_frontend
 
 # install npm dependencies
 npm install

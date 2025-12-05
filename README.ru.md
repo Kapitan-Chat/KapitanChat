@@ -230,6 +230,7 @@ npm run dev
 >для `VITE_BASE_FMS_URL` для файлов
 >надо качать дополнительный микросервис
 >с https://github.com/Kapitan-Chat/StorageService
+
 >[!Info]
 >создайте .env в корне фронтенд-проекта и запишите туда переменные среды
 ```env
